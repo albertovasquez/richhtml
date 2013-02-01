@@ -5,6 +5,6 @@ Attempt to write some robust replacements to extjs bloated grid and windows cont
 
 Richhtml Grid documenation and examples can be found at http://www.richhtml.com/richgrid/step1.html
 
-In use by
-=========
+Used by
+=======
 ClientExec - http://www.clientexec.com
