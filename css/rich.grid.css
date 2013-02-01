@@ -1,0 +1,447 @@
+@font-face {
+	font-family: 'mini50';
+	src:url('../fonts/mini50.eot');
+	src:url('../fonts/mini50.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/mini50.svg#mini50') format('svg'),
+		url('../fonts/mini50.woff') format('woff'),
+		url('../fonts/mini50.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+/* Use the following CSS code if you want to use data attributes for inserting your icons */
+[data-rich-icon]:before {
+	font-family: 'mini50';
+	content: attr(data-rich-icon);
+	speak: none;
+	font-weight: normal;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+}
+
+.richtable {
+	margin-bottom: 10px;
+}
+
+.richtable table,
+.richtable caption,
+.richtable tbody,
+.richtable tfoot,
+.richtable thead,
+.richtable tr,
+.richtable th,
+.richtable td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+}
+
+.richtable tr.collapsed
+{
+	display:none;
+}
+
+.richtable .rich-grouptoggle {
+	display:none;
+}
+
+.richtable .rich-grouptoggle.visible {
+	display:inline;
+}
+
+.richtable .rich-grouptoggle {
+	padding-right:7px;
+	position:relative;
+	top:1px;
+	color: #999;
+}
+
+.richtable .rich-grouptoggle:hover {
+	color: #444;
+	cursor: pointer;
+}
+
+.richtable td.rich-group-name {
+	background-color: #F1F1EE;
+}
+
+.richtable td.rich-group-name:hover {
+	background-color: #F1F1EE;
+}
+
+.richtable .rich-footer{
+	width: 100%;
+	border: 1px solid #CDCDCD;
+}
+
+.richtable a:active,
+.richtable a:hover {
+	color: #bd5a35;
+	text-decoration:underline;
+}
+
+/*
+Table Style - This is what you want
+------------------------------------------------------------------ */
+.richtable table tbody .expander-icon {
+	cursor: pointer;
+	height: 15px;
+	background-position: 0px 2px;
+	background-image: url(../images/grid/row-expand-sprite-ne.gif);
+}
+
+.richtable table tbody .expander-icon:hover {
+	background-position: -23px 2px;
+}
+
+.richtable table tbody .expander-icon-expanded {
+	cursor: pointer;
+	height: 15px;
+	background-position: -48px 1px;
+	margin-top: 2px;
+	background-image: url(../images/grid/row-expand-sprite-ne.gif);
+}
+
+.richtable table tbody .checkbox-icon{
+	cursor: pointer;
+	height: 15px;
+	background-position: 7px 1px;
+	margin-top: 2px;
+	background-image: url(../images/grid/row-check-sprite.gif);
+	background-repeat: no-repeat;
+	vertical-align: middle;
+	padding-left: 0px !important;
+	padding-right: 0px !important;
+}
+
+.richtable table tbody td.hide-checkbox .checkbox-icon {
+	display:none;
+}
+
+.richtable table tbody .checkbox-icon-checked {
+	cursor: pointer;
+	background-position: -18px 1px;
+	background-image: url(../images/grid/row-check-sprite.gif);
+	background-repeat: no-repeat;
+}
+
+.richtable table tbody td.draghandle .drag-icon {
+	height: 15px;
+	width: 15px;
+	background-position: 11px 2px;
+	cursor:move;
+	background-repeat:repeat;
+	background-image: url(../images/grid/rgDrag.gif);
+}
+
+.richtable .dragging td
+{
+	border-left: 0px!important;
+	border-right: 0px!important;
+	opacity: 0.3;
+}
+
+.richtable table {
+	color:#666;
+	background:#eaebec;
+	border:#ccc 1px solid;
+	border-top: 2px solid #A4000C;
+	border-left: 1px solid #F4F4F4;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	border-spacing: 0;
+}
+
+.richtable table th {
+	font-size: 11px;
+	padding: 0px 10px 4px 10px;
+	border-top:1px solid #fafafa;
+	background-image: url(../images/grid/header-row.gif);
+	border-left: 1px solid #EEE;
+	border-right: 1px solid #D0D0D0;
+	white-space:nowrap;
+        text-shadow: 1px 1px 0px #fff;
+}
+
+.richtable table th.expander,
+.richtable table th.checkbox,
+.richtable table th.drag,
+.richtable table th.checkbox-checked
+ {
+	padding-left:0px !important;
+	padding-right:0px !important;
+}
+
+.richtable table th.sortable:hover,
+.richtable table th.sortable-selected,
+.richtable table th.sortable-selected:hover,
+.richtable table th.checkbox:hover,
+.richtable table th.checkbox-checked:hover {
+	background-color: #DFDFDF;
+	background-image: none;
+	border-top-color: #DFDFDF;
+	cursor:pointer;
+}
+
+.richtable table th.sortable span.sort-icon {
+  background-image: url(../images/grid/col-sorting.png);
+  background-repeat: no-repeat;
+  background-position: -17px -31px;
+  padding-right: 0px;
+  padding-left:12px;
+}
+
+.richtable table th.sortable span.sort-icon-desc {
+  background-position: -17px -58px !important;
+}
+
+.richtable table th.sortable span.sort-icon-asc {
+  background-position: -17px -5px !important;
+}
+
+.richtable table th.checkbox span,
+.richtable table th.checkbox-checked span {
+	background-image: url(../images/grid/row-check-sprite.gif);
+	background-repeat: no-repeat;
+	vertical-align: middle;
+	display:block;
+	height: 18px;
+}
+
+.richtable table th.checkbox span {
+	background-position: 7px 3px;
+}
+
+.richtable table th.checkbox-checked span {
+	background-position: -19px 3px;
+}
+
+.richtable table th.center,
+.richtable table td.center {
+	text-align: center;
+}
+
+.richtable table th.right,
+.richtable table td.right {
+	text-align: right;
+}
+
+.richtable table th.left,
+.richtable table td.left {
+	text-align: left;
+}
+
+.richtable table tr td:first-child{
+	border-left: 0;
+}
+
+.richtable table tr td.expander {
+	padding-left:0px;
+	padding-right: 0px;
+	width:19px;
+}
+
+.richtable table tr td .expander-data {
+	margin-top: 5px;
+	margin-bottom: 8px;
+	min-height:1px;
+        text-shadow: 1px 1px 0px #fff;
+}
+
+.richtable table tr td {
+	height: 20px;
+	padding:5px;
+	padding-right: 10px;
+	padding-left:10px;
+	border-bottom:1px solid #e0e0e0;
+	border-top: 1px solid #ffffff;
+	background: #fafafa;
+}
+
+.richtable table tr.odd td{
+	background: #f6f6f6;
+	/*#FBF9EA*/
+}
+
+.richtable table tr.row-selected td {
+	background: #f5f5e9;
+	border-left: 0px;
+	border-right: 0px;
+}
+
+.richtable table tr.row-selected:hover td{
+	background: #f5f5e9;
+}
+
+.richtable table tr td.col-selected {
+	background: whiteSmoke;
+	border-left: 1px solid #DFDFDF;
+	border-right: 1px solid #DFDFDF;
+	border-top:0px;
+}
+
+.richtable table tr.row-selected td.col-selected {
+	background: #f2f2d0;
+}
+
+.richtable table tr td.nobottomborder {
+	border-bottom:none;
+}
+
+.richtable table tr td.checkbox{
+	padding-left:0px;
+	padding-right:0px;
+}
+
+.richtable table tr:last-child td{
+	border-bottom:0;
+}
+
+.richtable table tr:hover td{
+	background: #f2f2f2;
+}
+
+.richtable table tr.expander-row {
+	background-image: url(../images/grid/expander-content-pattern.png);
+}
+
+.richtable table tr.expander-row td {
+	background: none;
+	border-top: 0px;
+	box-shadow: inset 0 17px 20px -22px #000000;
+}
+
+.richtable table tr.expander-row div.pointer {
+	position: relative;
+	top: -5px;
+	left: 62px;
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid whiteSmoke;
+	border-bottom: 0;
+}
+
+.richtable table tfoot th{
+	border-right: 0px;
+	height: 17px;
+}
+
+.richgrid-nodata {
+	text-align: center;
+	font-size: larger;
+	padding-bottom: 20px !important;
+	padding-top:20px !important;
+}
+
+/*pagination*/
+
+.richgrid-pagenavi {
+	font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+	height:30px;
+	font-size:0.90em;
+	-webkit-font-smoothing:antialiased;
+}
+
+.richgrid-pagenavi-wrapper {
+	float:right;
+	margin-top:10px;
+}
+
+.richgrid-pagenavi span {
+	background:url(../images/grid/numbers_spritesheet.png) no-repeat;
+	display:block;
+	float:left;
+	width:28px;
+	height:27px;
+	text-decoration:none;
+	text-align:center;
+	line-height:26px;
+	margin-right:3px;
+	font-weight:bold;
+}
+.richgrid-pagenavi span:active {
+	margin-top:1px;
+}
+
+.richgrid-pagenavi span.current:active {
+	margin-top:0px;
+}
+
+.richgrid-pagenavi .pages, .richgrid-pagenavi .extend {
+	background:none;
+	width:auto;
+	font-weight:normal;
+	margin-right:7px;
+	line-height:27px;
+}
+.richgrid-pagenavi .extend {
+	padding:0 5px;
+	margin:0 5px 0 1px;
+}
+.richgrid-pagenavi .nextpostslink,
+.richgrid-pagenavi .previouspostslink
+{
+	text-indent:-9999px;
+}
+/* Individual color themes */
+
+.richgrid-pagenavi span {
+	background-position:0 0;
+	color:#717171;
+	text-shadow:1px 1px 0 #fff;
+	text-decoration: none;
+}
+.richgrid-pagenavi span:hover {
+	background-position:0 -27px;
+	cursor:pointer;
+}
+.richgrid-pagenavi span.current
+{
+	text-shadow:0 1px 0 #585858;
+	color:#fff;
+	background-position:-140px 0;
+}
+
+.richgrid-pagenavi span.current:hover {
+	cursor:default;
+	background-position:-140px 0;
+}
+
+.richgrid-pagenavi .nextpostslink {
+	background-position:-113px 0 !important;
+}
+.richgrid-pagenavi .nextpostslink:hover {
+	background-position:-113px -27px !important;
+}
+.richgrid-pagenavi .previouspostslink {
+	background-position:-28px 0 !important;
+}
+.richgrid-pagenavi .previouspostslink:hover {
+	background-position:-28px -27px !important;
+}
+
+.richgrid-pagenavi .nextpostslink[disabled],
+.richgrid-pagenavi .previouspostslink[disabled]
+{
+	-moz-opacity: 0.4;
+	opacity:.40;
+	filter: alpha(opacity=40);
+	color: #aaa !important;
+}
+
+.richgrid-pagenavi .first {
+	background-position:-56px 0 !important;
+}
+.richgrid-pagenavi .first:hover {
+	background-position:-56px -27px !important;
+}
+.richgrid-pagenavi .last {
+	background-position:-84px 0 !important;
+}
+.richgrid-pagenavi .last:hover {
+	background-position:-84px -27px !important;
+}
