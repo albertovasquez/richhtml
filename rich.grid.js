@@ -654,11 +654,11 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 			loopend=Array.min(Array(self.pagingData.page,self.pagingData.pages));
 
 
-			if (loopstart!==1) {
+			if (loopstart!==1 && (self.pagingData.page > 2)) {
 				buttonshtml += "<span class='first' data-"+self.id+"-link='0'></span>";
 			}
 
-			if (self.pagingData.page > 2) {
+			if (self.pagingData.page > 1) {
 				buttonshtml += "<span data-"+self.id+"-link='"+((self.pagingData.page-2)*self.baseParams.limit)+"' class='previouspostslink'></span>";
 			}
 
