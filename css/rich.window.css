@@ -190,10 +190,6 @@ button.rich-button.rich-button-small i {
 button.rich-button:hover, button.rich-button:focus {
     background-position: 0 -28px;
     outline: 0;
-    padding-bottom: 6px;
-}
-button.rich-button.rich-button-small:hover, button.rich-button.rich-button-small:focus {
-    padding-bottom: 2px;
 }
 button.rich-button:hover span, button.rich-button:focus span,
 button.rich-button:hover i, button.rich-button:focus i {
