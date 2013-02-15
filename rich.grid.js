@@ -326,7 +326,7 @@ RichHTML.grid.prototype.mapCellModifiers = function (el,id) {
     var self = this;
     if(typeof(el.addClass)!== "undefined") { $('td[id="'+id+'"]').addClass(el.addClass); }
     if(typeof(el.removeClass)!== "undefined") { $('td[id="'+id+'"]').removeClass(el.removeClass); }
-    if(typeof(el.addStyle)!== "undefined") { $('td[id="'+id+'"]').attr('style',addStyle);}
+    if(typeof(el.addStyle)!== "undefined") { $('td[id="'+id+'"]').attr('style',el.addStyle);}
     if(typeof(el.removeStyle)!== "undefined" && el.removeStyle) { $('td[id="'+id+'"]').attr('style',''); }
     $(self).unbind('colload');
 };
