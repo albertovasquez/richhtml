@@ -201,9 +201,9 @@ RichHTML.window = function(config){
 //check to see if jquery validator is supported
 //if so validate and if not just submit
 RichHTML.window.prototype.callDelete = function (method) {
-    var self = this, $me;
+    var self = this, me;
 
-    $me = $('#'+self.id);
+    me = $('#'+self.id);
     if (typeof(self.options.deleteUrl) === "undefined") {
         RichHTML.debug(1,"You need to define a deleteUrl if you want to use the delete method.");
         return false;
@@ -234,7 +234,7 @@ RichHTML.window.prototype.callDelete = function (method) {
     //lets add some hidden elements
     if (self.params && typeof(self.params) !== "undefined") {
         $.each(self.params,function(c_i, c_val) {
-            $me.find('.window-description form .window-description-elements').append(
+            me.find('.window-description form .window-description-elements').append(
                 $('<input/>')
                 .attr('type', 'hidden')
                 .attr('name', c_i)
@@ -252,11 +252,11 @@ RichHTML.window.prototype.callDelete = function (method) {
 //check to see if jquery validator is supported
 //if so validate and if not just submit
 RichHTML.window.prototype.submit = function (method) {
-    var self = this, $me;
+    var self = this, me;
 
     if (!method) method = null;
 
-    $me = $('#'+self.id);
+    me = $('#'+self.id);
     if (typeof(self.options.actionUrl) === "undefined") {
         RichHTML.debug(1,"You need to define an actionUrl if you want to use the submit method.");
         return false;
@@ -280,7 +280,7 @@ RichHTML.window.prototype.submit = function (method) {
     //lets add some hidden elements
     if (self.params && typeof(self.params) !== "undefined") {
         $.each(self.params,function(c_i, c_val) {
-            $me.find('.window-description form .window-description-elements').append(
+            me.find('.window-description form .window-description-elements').append(
                 $('<input/>')
                 .attr('type', 'hidden')
                 .attr('name', c_i)
@@ -334,6 +334,16 @@ RichHTML.window.prototype.checkContent = function () {
     }
 
     return true;
+};
+
+/**
+ * Method to set height of window after render
+ * @param void
+ */
+RichHTML.window.prototype.setHeight = function(height) {
+    var self = this,innerwindow;
+    innerwindow = $('#'+self.id).find('.window-description');
+    innerwindow.height(height);
 };
 
 RichHTML.window.prototype.prepTemplate = function () {
@@ -405,26 +415,26 @@ RichHTML.window.prototype.prepButtons = function() {
 };
 
 RichHTML.window.prototype.render = function(useOverlay) {
-    var self = this, $me;
+    var self = this, me;
 
     if (useOverlay) {
         $('<div class = "rich-dark-overlay" />').appendTo('body').fadeIn("slow");
     }
 
     $(document.body).append(self.template);
-    $me = $('#'+self.id);
+    me = $('#'+self.id);
 
     if (!self.hasButtons) {
-        $me.find('.window-buttons').css('display','none');
-        $me.find('.window-description').addClass('window-no-buttons');
+        me.find('.window-buttons').css('display','none');
+        me.find('.window-description').addClass('window-no-buttons');
     }
 
     if (self.options.hideTitle) {
-        $me.find('.window-title').css('display','none');
-        $me.find('.window-description').addClass('window-no-title');
+        me.find('.window-title').css('display','none');
+        me.find('.window-description').addClass('window-no-title');
     }
 
-    self.form = $me.find('.window-description form');
+    self.form = me.find('.window-description form');
 
     if (typeof (self.options.el) !== "undefined") {
         RichHTML.debug(3,"Loading content from element with id: "+self.options.el);
@@ -488,10 +498,10 @@ RichHTML.window.prototype.validateForm = function () {
 };
 
 RichHTML.window.prototype.buttonBindings = function () {
-    var self = this, $me, data = {};
-    $me = $('#'+self.id);
+    var self = this, me, data = {};
+    me = $('#'+self.id);
 
-    $me.find('.rich-button').bind('click', function () {
+    me.find('.rich-button').bind('click', function () {
         var scope, buttonId = $(this).attr('id').substring(12);
 
         //lets check to see if we have the default close buttons
@@ -584,13 +594,13 @@ RichHTML.window.prototype.reload = function() {
  * @return void
  */
 RichHTML.window.prototype.load = function() {
-    var self = this, $me;
-    $me = $('#'+self.id);
+    var self = this, me;
+    me = $('#'+self.id);
 
     if (self.delayLoad) {
         RichHTML.onMask(self);
         $.get(self.options.url, self.params,function(response, status, xhr) {
-            $me.find('.window-description form .window-description-elements').html(response);
+            me.find('.window-description form .window-description-elements').html(response);
             if (status == "error") {
                 var msg = "Sorry but there was an error: ";
                 RichHTML.debug(1,Array(msg + xhr.status + " " + xhr.statusText,xhr));
@@ -613,7 +623,7 @@ RichHTML.window.prototype.load = function() {
  * @return true
  */
 RichHTML.window.prototype.show = function(options) {
-    var self = this, $me;
+    var self = this;
 
     if (options && typeof(options.params) !== "undefined") {
         self.params = $.extend(self.params,options.params);
@@ -649,12 +659,12 @@ RichHTML.window.prototype.show = function(options) {
 //this is to prep the content loaded mostly for tabbing
 //also adds hidden elements
 RichHTML.window.prototype.prepElements = function() {
-    var self = this, tabbable, $me;
+    var self = this, tabbable, me;
 
-    $me = $('#'+self.id);
+    me = $('#'+self.id);
     //lets set first element active
-    $me.find(':input, .rich-button, textarea').eq(0).focus();
-    tabbable = $me.find(':input, .rich-button, textarea');
+    me.find(':input, .rich-button, textarea').eq(0).focus();
+    tabbable = me.find(':input, .rich-button, textarea');
     if (tabbable.length > 0) {
         self.elements.firstElement = $(tabbable).filter(':first');
         self.elements.lastElement = $(tabbable).filter(':last');
@@ -671,18 +681,18 @@ RichHTML.window.prototype.prepElements = function() {
 };
 
 RichHTML.window.prototype.setDraggable = function () {
-    var self = this, $me, relX, relY, thistarget, targetw, targeth,docw,doch,ismousedown=false;
+    var self = this, me, relX, relY, thistarget, targetw, targeth,docw,doch,ismousedown=false;
 
-    $me = $('#'+self.id);
-    $me.css('position','absolute');
-    thistarget = $me.find('.window-title');
+    me = $('#'+self.id);
+    me.css('position','absolute');
+    thistarget = me.find('.window-title');
 
     targetw = thistarget.width();
     targeth = thistarget.height();
 
     thistarget.bind('mousedown', function(e){
         var pos,srcX,srcY,mousePos;
-        pos = $me.offset();
+        pos = me.offset();
         srcX = pos.left;
         srcY = pos.top;
 
@@ -700,8 +710,8 @@ RichHTML.window.prototype.setDraggable = function () {
         var maxY, maxX, mousePos, diffX, diffY;
         if(ismousedown)
         {
-            targetw = $me.width();
-            targeth = $me.height();
+            targetw = me.width();
+            targeth = me.height();
 
             maxX = docw - targetw - 10;
             maxY = doch - targeth - 10;
@@ -711,8 +721,8 @@ RichHTML.window.prototype.setDraggable = function () {
             diffX = mousePos.x - relX;
             diffY = mousePos.y - relY;
 
-            $me.css('top', (diffY)+'px');
-            $me.css('left', (diffX)+'px');
+            me.css('top', (diffY)+'px');
+            me.css('left', (diffX)+'px');
         }
     });
 
