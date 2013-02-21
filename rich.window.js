@@ -341,8 +341,7 @@ RichHTML.window.prototype.checkContent = function () {
  * @param void
  */
 RichHTML.window.prototype.setHeight = function(height) {
-    var self = this,innerwindow;
-    innerwindow = $('#'+self.id).find('.window-description');
+    var innerwindow = $('#'+this.id).find('.window-description');
     innerwindow.height(height);
 };
 
