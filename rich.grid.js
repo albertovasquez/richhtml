@@ -113,13 +113,13 @@ RichHTML.grid.prototype.render = function () {
 RichHTML.grid.prototype.enable = function()
 {
     var self = this;
-    RichHTML.onUnMask(self);
+    RichHTML.unMask();
 };
 
 RichHTML.grid.prototype.disable = function()
 {
     var self = this;
-    RichHTML.onMask(self);
+    RichHTML.mask('#'+self.id);
 };
 
 /*
@@ -129,7 +129,7 @@ uses the json passed to it
 RichHTML.grid.prototype.initialLoad = function(json) {
     var self = this;
 
-    RichHTML.onMask(self);
+    RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
 
     if (self.url!==null) {
@@ -223,8 +223,8 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
 RichHTML.grid.prototype.reload = function (config) {
 	var self = this,params = {};
 
-	RichHTML.onMask(self);
-        RichHTML.onPreLoad(self);
+	RichHTML.mask('#'+self.id);
+    RichHTML.onPreLoad(self);
 
 	//lets see if we are passing any new params
 	if (config && (typeof(config.params) !== "undefined")) { params = config.params; }
@@ -739,7 +739,7 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
         }
     }
 
-	RichHTML.onUnMask(self);
+	RichHTML.unMask();
     RichHTML.onPostLoad(self);
 
 	//lets raise trigger that data has been loaded and pass data
