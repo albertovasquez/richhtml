@@ -597,7 +597,7 @@ RichHTML.window.prototype.load = function() {
     me = $('#'+self.id);
 
     if (self.delayLoad) {
-        RichHTML.onMask(self);
+        RichHTML.mask('#'+self.id);
         $.get(self.options.url, self.params,function(response, status, xhr) {
             me.find('.window-description form .window-description-elements').html(response);
             if (status == "error") {
@@ -606,7 +606,7 @@ RichHTML.window.prototype.load = function() {
             }
             self.prepElements();
         });
-        RichHTML.onUnMask(self);
+        RichHTML.unMask();
     }else{
         self.prepElements();
     }

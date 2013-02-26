@@ -78,33 +78,32 @@ RichHTML.apply = function (o, c, defaults) {
             }
             return str;
         },
-        onMask : function(el) {
-            var $t;
-            $t = $('#'+el.id);
+        mask : function(selector) {
+
+            if (!selector) selector = "body";
+            var $t, height, width;
+            $t = $(selector);
+            height = ($t.outerHeight() === 0) ? 10000 : $t.outerHeight();
+            width = $t.outerWidth();
+
             $("#richhtml-overlay").css({
               top     : $t.offset().top,
-              width   : $t.outerWidth(),
-              height  : $t.outerHeight(),
               left    : $t.offset().left,
-              position: 'relative',
-              opacity : '.30',
-		  	  filter  : 'alpha(opacity=30)',
-		  	  backgroundColor: '#999',
-		  	  display : ''
+              width   : width,
+              height  : height,
+              display : ''
             });
 
-            $("#richhtml-overlay").show();
-            $(this).trigger('mask');
-            },
+            $("#richhtml-overlay").fadeIn('slow');
+        },
         onPreLoad: function(el) {
             $(this).trigger('preload');
         },
         onPostLoad: function(el) {
             $(this).trigger('postload');
         },
-        onUnMask: function(el) {
+        unMask: function() {
             $("#richhtml-overlay").fadeOut();
-            $(this).trigger('unmask');
             $("#richhtml-overlay").css({display:'none',left:'-999999px'});
         },
         debug : function(lvl,message){
@@ -113,14 +112,14 @@ RichHTML.apply = function (o, c, defaults) {
           }
         },
         mouseCoords : function(ev){
-	        if(ev.pageX || ev.pageY){
-	            return {x:ev.pageX, y:ev.pageY};
-	        }
-	        return {
-	            x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-	            y:ev.clientY + document.body.scrollTop  - document.body.clientTop
-	        };
-	    },
+            if(ev.pageX || ev.pageY){
+                return {x:ev.pageX, y:ev.pageY};
+            }
+            return {
+                x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,
+                y:ev.clientY + document.body.scrollTop  - document.body.clientTop
+            };
+        },
         getDom : function(el, strict){
             var e;
             if(!el || !document){
@@ -146,7 +145,7 @@ RichHTML.apply = function (o, c, defaults) {
         },
         center : function (el,containerEl,transition,offset) {
 
-                        if(!offset) { offset = 0;}
+            if(!offset) { offset = 0;}
 
 			var $me = el;
 			if (!containerEl) { containerEl = window; }
@@ -154,33 +153,33 @@ RichHTML.apply = function (o, c, defaults) {
 			return $me.each(function() {
 				var props, top, left;
 				if (containerEl == window) {
-		        	props = {position:'absolute'};
-		        	$me.css(props);
-				    top = ($(containerEl).height() - $me.outerHeight()) / 2;
-				    top += $(containerEl).scrollTop() || 0;
-				    top = (top > 0 ? top : 0);
+                props = {position:'absolute'};
+                $me.css(props);
+                top = ($(containerEl).height() - $me.outerHeight()) / 2;
+                top += $(containerEl).scrollTop() || 0;
+                top = (top > 0 ? top : 0);
 
-		        } else {
-		        	props = {position:'relative'};
-				    top = ($(containerEl).parent().height() - $me.outerHeight()) / 2;
-				    top += $(containerEl).scrollTop() || 0;
-				    top = (top > 0 ? top : 0);
-		        }
+            } else {
+                props = {position:'relative'};
+                top = ($(containerEl).parent().height() - $me.outerHeight()) / 2;
+                top += $(containerEl).scrollTop() || 0;
+                top = (top > 0 ? top : 0);
+            }
 
-                        //vertical
-                        top = (top - offset < 10) ? top : top-offset;
-                        $.extend(props, {top: top +'px'});
+                //vertical
+                top = (top - offset < 10) ? top : top-offset;
+                $.extend(props, {top: top +'px'});
 
 				//horizontal
-		        left = ($(containerEl).width() - $me.outerWidth()) / 2;
-		        left += $(containerEl).scrollLeft() || 0;
-		        left = (left > 0 ? left : 0);
-		        $.extend(props, {left: left+'px'});
+                left = ($(containerEl).width() - $me.outerWidth()) / 2;
+                left += $(containerEl).scrollLeft() || 0;
+                left = (left > 0 ? left : 0);
+                $.extend(props, {left: left+'px'});
 
-		        if (transition && transition > 0) { $me.animate(props, transition); }
-		        else { $me.css(props); }
-		        return $me;
-		   });
+                if (transition && transition > 0) { $me.animate(props, transition); }
+                else { $me.css(props); }
+                return $me;
+            });
 
 		}
     });
