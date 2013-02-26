@@ -78,9 +78,10 @@ RichHTML.apply = function (o, c, defaults) {
             }
             return str;
         },
-        mask : function(selector) {
+        mask : function(selector,fade) {
 
-            if (!selector) selector = "body";
+            if (!fade) fade = false;
+            if ((!selector) || selector === null) selector = "body";
             var $t, height, width;
             $t = $(selector);
             height = ($t.outerHeight() === 0) ? 10000 : $t.outerHeight();
@@ -94,7 +95,8 @@ RichHTML.apply = function (o, c, defaults) {
               display : ''
             });
 
-            $("#richhtml-overlay").fadeIn('slow');
+            if (fade) $("#richhtml-overlay").fadeIn('slow');
+            else $("#richhtml-overlay").show();
         },
         onPreLoad: function(el) {
             $(this).trigger('preload');
