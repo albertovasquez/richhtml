@@ -24,7 +24,6 @@
 }
 
 .richwindow {
-	font: 12px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 	background-color: rgba(0,0,0,0.50);
 	padding:6px;
 	z-index:1002;
@@ -83,7 +82,6 @@
 }
 
 .richwindow .window-description {
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 	margin-left:auto;
 	margin-right:auto;
 	padding-left:20px;
