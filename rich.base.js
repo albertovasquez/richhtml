@@ -84,7 +84,7 @@ RichHTML.apply = function (o, c, defaults) {
             if ((!selector) || selector === null) selector = "body";
             var $t, height, width;
             $t = $(selector);
-            height = ($t.outerHeight() === 0) ? 10000 : $t.outerHeight();
+            height = ($t.outerHeight() === 0) ? $(document).height() : $t.outerHeight();
             width = $t.outerWidth();
 
             $("#richhtml-overlay").css({
