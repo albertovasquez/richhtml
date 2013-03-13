@@ -9,12 +9,14 @@
 RichHTML.msgBox = function (content, config, callback)
 {
     var msgBox = new RichHTML.window({});
+    var required = "";
 
     msgBox.name = 'msgBox';
     msgBox.options.escClose = false;
     msgBox.options.type = "alert"; //alert,info,error,prompt,confirm, question
     msgBox.options.password = false;
     msgBox.options.textarea = false;
+    msgBox.options.allowblank = false;
 
     msgBox.confirm_buttons = {  button1:{text:"yes"}, button2:{text:"no"}, button3:{text:"cancel",type:"cancel"} };
     msgBox.prompt_buttons = {  button1:{text:"ok"}, button2:{text:"cancel",type:"cancel"} };
@@ -42,12 +44,17 @@ RichHTML.msgBox = function (content, config, callback)
     switch (msgBox.options.type) {
         case "prompt":
             if (msgBox.options.content ===  null) {
+
+                if (msgBox.options.allowblank) {
+                    required = " class='required' ";
+                }
+
                 if (msgBox.options.password) {
                     msgBox.options.content = content + "<input type='password' class='required' name='value' style='width:80%;' />";
                 } else if (msgBox.options.textarea) {
-                    msgBox.options.content = content + "<textarea class='required' name='value' style='width:100%;' rows='2' /></textarea>";
+                    msgBox.options.content = content + "<textarea "+required+" name='value' style='width:100%;' rows='2' /></textarea>";
                 } else {
-                    msgBox.options.content = content + "<input type='text' class='required' name='value' style='width:80%;' />";
+                    msgBox.options.content = content + "<input type='text' "+required+" name='value' style='width:80%;' />";
                 }
             }
             break;
