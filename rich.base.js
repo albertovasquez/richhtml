@@ -31,14 +31,7 @@ RichHTML.apply = function (o, c, defaults) {
 
 (function (){
 
-	var idSeed = 0,
-        isIE = $.browser.msie,
-        isIE6 = ($.browser.msie && $.browser.version === "6.0");
-    if(isIE6){
-        try{
-            document.execCommand("BackgroundImageCache", false, true);
-        }catch(e){}
-    }
+	var idSeed = 0;
 
     RichHTML.apply(RichHTML, {
         overlayTpl :'<div id="richhtml-overlay" style="display:none;left:-999999px;"></div>',
@@ -127,23 +120,7 @@ RichHTML.apply = function (o, c, defaults) {
             if(!el || !document){
                 return null;
             }
-            if (el.dom){
-                return el.dom;
-            } else {
-                if (typeof el === 'string') {
-                    e = document.getElementById(el);
-                    if (e && isIE && strict) {
-                        if (el === e.getAttribute('id')) {
-                            return e;
-                        } else {
-                            return null;
-                        }
-                    }
-                    return e;
-                } else {
-                    return el;
-                }
-            }
+            return $(".ce-container").get(0);
         },
         center : function (el,containerEl,transition,offset) {
 
