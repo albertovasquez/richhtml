@@ -68,6 +68,7 @@
 
 .richtable td.rich-group-name {
 	background-color: #F1F1EE;
+	padding-left:7px;
 }
 
 .richtable td.rich-group-name:hover {
@@ -251,7 +252,7 @@ Table Style - This is what you want
 	margin-top: 0px;
 	margin-bottom: 10px;
 	min-height:1px;
-        text-shadow: 1px 1px 0px #fff;
+    text-shadow: 1px 1px 0px #fff;
 }
 
 .richtable table tr td {
