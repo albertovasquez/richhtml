@@ -503,6 +503,28 @@ RichHTML.window.prototype.validateForm = function () {
 }
 };
 
+RichHTML.window.prototype.mask = function() {
+    var $t, height, width;
+    $t = $('.richwindow');
+    height = ($t.outerHeight() === 0) ? $(document).height() : $t.outerHeight();
+    width = $t.outerWidth();
+
+    $("#richhtml-overlay-inner").css({
+      top     : $t.offset().top,
+      left    : $t.offset().left,
+      width   : width,
+      height  : height,
+      display : ''
+    });
+
+    $("#richhtml-overlay-inner").show();
+};
+
+RichHTML.window.prototype.unMask = function() {
+    $("#richhtml-overlay-inner").fadeOut();
+    $("#richhtml-overlay-inner").css({display:'none',left:'-999999px'});
+};
+
 RichHTML.window.prototype.buttonBindings = function () {
     var self = this, me, data = {};
     me = $('#'+self.id);

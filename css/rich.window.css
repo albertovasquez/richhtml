@@ -8,6 +8,16 @@
     z-index:1001;
 }
 
+#richhtml-overlay-inner {
+    position: relative;
+    -moz-opacity: 0.4;
+    opacity:.40;
+    filter: alpha(opacity=40);
+    background-color: #888;
+    display : none;
+    z-index:1004;
+}
+
 .rich-dark-overlay{
 	display: none;
 	position: fixed;
@@ -135,7 +145,6 @@ a.rich-button {
     text-decoration: none !important;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
 	display: inline-block;
-    font-size: 11px;
     padding: 8px 10px 0 10px;
     height: 20px;
 }

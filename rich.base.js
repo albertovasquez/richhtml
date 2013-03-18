@@ -34,7 +34,7 @@ RichHTML.apply = function (o, c, defaults) {
 	var idSeed = 0;
 
     RichHTML.apply(RichHTML, {
-        overlayTpl :'<div id="richhtml-overlay" style="display:none;left:-999999px;"></div>',
+        overlayTpl :'<div id="richhtml-overlay" style="display:none;left:-999999px;"></div><div id="richhtml-overlay-inner" style="display:none;left:-999999px;"></div>',
         id : function(el, prefix){
             el = RichHTML.getDom(el, true) || {};
             if (!el.id) {
