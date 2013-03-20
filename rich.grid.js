@@ -611,17 +611,18 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 
 
 		if (self.hasCheckbox) {
-            $("#"+self.id+" tbody td .checkbox-icon").bind('click', function(event) {
+            $("#"+self.id+" tbody td .checkbox-icon").bind('click', function(event,massclick) {
+
                 //trigger rowselect
                 var rowid, data;
-                if(typeof(event.massclick)==="undefined") { event.massclick = false;}
+                if(typeof(massclick)==="undefined") { massclick = false;}
 
                 $(this).toggleClass('checkbox-icon-checked');
-                if(!event.massclick && !$(this).hasClass('checkbox-icon-checked')) {
+                if(!massclick && !$(this).hasClass('checkbox-icon-checked')) {
                     $("#"+self.id+" th.checkbox-checked").removeClass('checkbox-checked').addClass('checkbox');
                 }
 
-                if (!event.massclick){
+                if (!massclick){
                     rowid = $(this).parent().attr('id').split("{-}")[1];
                     data = {};
                     data.rowid = rowid;
@@ -714,15 +715,18 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
     //bind the checkall
     if (self.hasCheckbox) {
         if(!reloading) {
-            event = jQuery.Event("click");
-            event.massclick = true;
             $("#"+self.id+" thead th.checkbox").bind('click', function() {
+
                 th = this;
                 RichHTML.debug(3,Array('Clicking checkbox header',"#"+self.id));
                 if($(th).hasClass('checkbox')) {
-                    $("#"+self.id+" tbody td.checkbox div.checkbox-icon:not(.checkbox-icon-checked)").trigger(event);
+                    $("#"+self.id+" tbody td.checkbox div.checkbox-icon:not(.checkbox-icon-checked)").each(function(){
+                        $(this).trigger('click',[true]);
+                    });
                 } else {
-                    $("#"+self.id+" tbody td.checkbox div.checkbox-icon-checked").trigger(event);
+                    $("#"+self.id+" tbody td.checkbox div.checkbox-icon-checked").each(function(){
+                        $(this).trigger('click',[true]);
+                    });
                 }
                 $(th).toggleClass('checkbox').toggleClass('checkbox-checked');
 
