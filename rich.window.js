@@ -1,6 +1,6 @@
 /*
  * RichHTML v1.0.0 - jQuery/mustache.js grid control
- * Copyright (c) 2012 Alberto Vasquez
+ * Copyright (c) 2013 Alberto Vasquez
  *
  * www: http://www.richhtml.com
  * email: support@richhtml.com
@@ -96,6 +96,11 @@ RichHTML.msgBox = function (content, config, callback)
 
 };
 
+RichHTML.confirm = function(title,options,callback) {
+    var config = {type: 'confirm'};
+    config = $.extend(config,options);
+    RichHTML.msgBox(title,config,callback);
+};
 
 RichHTML.error = function(title,options,callback) {
     var config = {type: 'error'};
