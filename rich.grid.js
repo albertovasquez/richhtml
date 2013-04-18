@@ -95,7 +95,6 @@ RichHTML.grid.prototype.getSelectedRowIds = function () {
         substr = $(n).parent().attr('id').split('{-}');
         return $.trim(substr[1]);
     });
-    console.debug(arrayOfIds,typeof(arrayOfIds));
     return arrayOfIds;
 };
 
