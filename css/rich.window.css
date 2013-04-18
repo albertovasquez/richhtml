@@ -273,3 +273,7 @@ button.rich-button[disabled]:hover i, button.rich-button[disabled]:focus i {
 .richwindow .msgbox-confirm {
   background: url(../images/window/confirm.png) no-repeat 20px 20px;
 }
+
+.richwindow .msgbox-wrapper input {
+  margin-top:3px;
+}
