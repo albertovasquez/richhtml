@@ -1,6 +1,6 @@
 /*
  * RichHTML v1.0.0 - jQuery/mustache.js grid control
- * Copyright (c) 2013 Alberto Vasquez
+ * Copyright (c) 2012 Alberto Vasquez
  *
  * www: http://www.richhtml.com
  * email: support@richhtml.com
@@ -176,6 +176,8 @@ RichHTML.window = function(config){
     //lets bind esc to the form hide
     self.closeKeyHandler = function(e) {
         if (e.keyCode === 27 && self.options.escClose) {
+            //adding this here but not in richhtml as it is just for us
+            $('.richwindow .datepicker').hide();
             self.hide();
         }
     };
@@ -461,9 +463,48 @@ RichHTML.window.prototype.render = function(useOverlay) {
         $('.richwindow .loading-content').removeClass('loading-content');
     }
 
-    RichHTML.center($('#'+self.id),window,self.options.transition, 100);
+    //let's see if there was position passed
+    self.position();
+
 
     return true;
+};
+
+/**
+ * We have been given some position attributes for the window
+ * @param  {[type]} pos [description]
+ * @return {[type]}     [description]
+ */
+RichHTML.window.prototype.position = function () {
+    var self = this;
+    var props;
+    var obj = {};
+
+    if (self.options.right) {
+        obj.right = self.options.right+"px";
+    }
+
+    if (self.options.left) {
+        obj.left = self.options.left+"px";
+    }
+
+    if (self.options.top) {
+        obj.top = self.options.top+"px";
+    }
+
+    if (self.options.bottom) {
+        obj.bottom = self.options.bottom+"px";
+    }
+
+    if ( (self.options.right) || (self.options.left) || (self.options.top) || (self.options.bottom) ) {
+        obj.position = 'absolute';
+        $('#'+self.id).css(obj);
+    } else {
+        RichHTML.center($('#'+self.id),window,self.options.transition, 100);
+    }
+
+    return;
+
 };
 
 RichHTML.window.prototype.hide = function () {
