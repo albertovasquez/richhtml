@@ -176,8 +176,6 @@ RichHTML.window = function(config){
     //lets bind esc to the form hide
     self.closeKeyHandler = function(e) {
         if (e.keyCode === 27 && self.options.escClose) {
-            //adding this here but not in richhtml as it is just for us
-            $('.richwindow .datepicker').hide();
             self.hide();
         }
     };
