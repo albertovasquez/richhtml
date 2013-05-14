@@ -79,7 +79,7 @@ RichHTML.grid.prototype.getSelectedRowData = function () {
     var self = this,arrayOfObjs = [],ids;
     ids = self.getSelectedRowIds();
     $.each(self.data,function(k,v){
-        if ($.inArray(v.id, ids) > -1) {
+        if ($.grep(ids, function(n) { return n == v.id; }).length > 0) {
             arrayOfObjs.push(v);
         }
     });
