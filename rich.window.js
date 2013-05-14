@@ -45,7 +45,7 @@ RichHTML.msgBox = function (content, config, callback)
         case "prompt":
             if (msgBox.options.content ===  null) {
 
-                if (msgBox.options.allowblank) {
+                if ( msgBox.options.allowblank === false ) {
                     required = " class='required' ";
                 }
 
