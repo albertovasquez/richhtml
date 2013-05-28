@@ -542,6 +542,11 @@ RichHTML.window.prototype.validateForm = function () {
         return true;
     } else {
         $('#'+self.id+' .window-description .error').first().focus();
+
+        data = {};
+        data.validate = self.form.validate();
+        $(self).trigger("validationerror",[data]);
+
         return false;
     }
 } else {
