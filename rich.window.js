@@ -137,6 +137,7 @@ RichHTML.window = function(config){
     defaults = {
         content: null,
         width: 360,
+        showerrors: true,
         type: "form",
         grid: null,
         onSubmit: null,
@@ -170,7 +171,7 @@ RichHTML.window = function(config){
 
     self.template = '<div class="richwindow" id="{richid}" style="width:{width};"><div class="window-bg" style="width:{width};">';
     self.template += '<div class="window-title" style="width:{width};">{title}</div>';
-    self.template += '<div class="window-description loading-content {msgboxclasses}" style="{minHeight};height:{height};"><form action="index.php" id="form-description-{richid}" novalidate="novalidate" style="margin-bottom:5px;"><div class="window-description-elements"></div></form></div>';
+    self.template += '<div class="window-description loading-content {msgboxclasses}" style="{minHeight};height:{height};"><form novalidate action="index.php" id="form-description-{richid}" novalidate="novalidate" style="margin-bottom:5px;"><div class="window-description-elements"></div></form></div>';
     self.template += '<div class="window-buttons">{{buttons}}</div></div></div>';
 
     //lets bind esc to the form hide
@@ -319,10 +320,10 @@ RichHTML.window.prototype.postSubmit = function (data) {
 
         self.hide();
     } else {
-        if ((typeof (data.message) === "undefined") || (trim(data.message === ""))) {
+        if ((typeof (data.message) === "undefined") || ($.trim(data.message) === "")) {
             data.message = 'There was an error submitting your request';
         }
-        RichHTML.msgBox(data.message,{type:'error'});
+        if (self.options.showerrors) RichHTML.msgBox(data.message,{type:'error'});
     }
 };
 
@@ -521,9 +522,10 @@ RichHTML.window.prototype.hide = function () {
 
 RichHTML.window.prototype.validateForm = function () {
     var self = this;
+        data = {};
 
     if(jQuery().validate) {
-        self.form.validate({
+        data.validate = self.form.validate({
             highlight: function(element, errorClass, validClass) {
                 $(element).addClass(errorClass).removeClass(validClass);
             },
@@ -538,20 +540,31 @@ RichHTML.window.prototype.validateForm = function () {
             }
         }
         );
-    if (self.form.valid()) {
-        return true;
-    } else {
+
+        if (self.form.valid()) {
+            return true;
+        } else {
+            $('#'+self.id+' .window-description .error').first().focus();
+
+            $(self).trigger("validationerror",[data]);
+
+            return false;
+        }
+    } else if (jQuery().parsley) {
+
+        data.validate = self.form.parsley( 'validate' );
+        if (self.form.parsley( 'isValid' )) {
+            return true;
+        }
+
         $('#'+self.id+' .window-description .error').first().focus();
 
-        data = {};
-        data.validate = self.form.validate();
         $(self).trigger("validationerror",[data]);
 
         return false;
+    } else {
+        return true;
     }
-} else {
-    return true;
-}
 };
 
 RichHTML.window.prototype.mask = function() {
