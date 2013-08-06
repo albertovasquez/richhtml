@@ -104,11 +104,13 @@ RichHTML.prompt = function(title,options,callback) {
 
 RichHTML.alert = function(msg,options,callback) {
     var config = {type: 'yesno'};
+    config = $.extend(config,options);
     RichHTML.msgBox(msg,config,callback);
 };
 
-RichHTML.info = function(msg,option,callback) {
+RichHTML.info = function(msg,options,callback) {
     var config = {type: 'info'};
+    config = $.extend(config,options);
     RichHTML.msgBox(msg,config,callback);
 };
 
