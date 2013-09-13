@@ -67,6 +67,21 @@ RichHTML.grid = function(config){
     if (config.width) {this.width = config.width;}
     if (config.emptyText) {this.emptyText = config.emptyText;}
     if (config.baseParams) {jQuery.extend(this.baseParams, config.baseParams);}
+
+    //let's check to see if we have saved values from cookie
+    if(jQuery.cookie != 'undefined') {
+        if ($.cookie("richgrid-data")) {
+            cookie_vars = JSON.parse($.cookie("richgrid-data"));
+            if ( typeof(cookie_vars[this.el]) != "undefined" && 
+                 typeof(cookie_vars[this.el].d) != "undefined" && 
+                 typeof(cookie_vars[this.el].s) != "undefined") 
+             {                
+                this.baseParams.dir = cookie_vars[this.el].d;
+                this.baseParams.sort = cookie_vars[this.el].s;
+            }
+        }        
+    }
+
     if (config.totalProperty) {this.totalProperty = config.totalProperty;}
 
 };
@@ -227,7 +242,21 @@ RichHTML.grid.prototype.reload = function (config) {
     RichHTML.onPreLoad(self);
 
 	//lets see if we are passing any new params
-	if (config && (typeof(config.params) !== "undefined")) { params = config.params; }
+	if (config && (typeof(config.params) !== "undefined")) { 
+
+        params = config.params; 
+        //let's see if we have jquery cookie so we can store this for next time
+        if(jQuery.cookie != 'undefined') {
+            if ($.cookie("richgrid-data")) {
+                cookie_vars = JSON.parse($.cookie("richgrid-data"));
+            } else {
+                cookie_vars = {};
+            }
+            cookie_vars[self.el] = {'d':config.params.dir, 's':config.params.sort};            
+            $.cookie("richgrid-data", JSON.stringify(cookie_vars));
+        }
+
+    }
 
 	jQuery.extend(self.baseParams, params);
 
@@ -532,7 +561,7 @@ RichHTML.grid.prototype.columnRender = function () {
         }
 
         self.selectedColumn = $(this).attr('dataindex');
-        if (event.dosort) {
+        if (event.dosort) {        
          self.reload({"params":{"start":0,"dir":dir,"sort":self.selectedColumn}});
         }
     });
