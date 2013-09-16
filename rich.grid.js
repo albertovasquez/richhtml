@@ -18,7 +18,7 @@ RichHTML.grid = function(config){
     this.hasCheckbox= false;
     this.width= '100%';
     this.internalTpl = "<div class='richtable'><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='width:{{width}};{{#hidecolumn}}{{hidden}}{{/hidecolumn}}'><span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div class='richgrid-pagenavi-wrapper'></div></div>";
-    this.tbodyTpl = "{{#groups}}{{#groupname}}<tr class='rich-group-row'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
+    this.tbodyTpl = "{{#groups}}{{#groupname}}<tr class='rich-group-row' id='{{rich_group_id}}'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
     this.pagingTpl = "<div class='richgrid-pagenavi'>{navbuttons}</div>";
     this.columns= null;
     this.url= null;
@@ -210,25 +210,50 @@ RichHTML.grid.prototype.initialLoad = function(json) {
  * @return json new json with groups
  */
 RichHTML.grid.prototype.groupOnGroupField = function (json) {
+    var self = this;
     var minusvisible = 'visible';
     var plusvisible= '';
     var groups = [];
-    json.groups = [];
+    var group_index = 1;
+    json.groups = [];   
 
     //let's group them
-    for (var x=0; x< json.rows.length; x++) {
-
+    for (var x=0; x< json.rows.length; x++) {        
         if (typeof(groups[json.rows[x][this.groupField]]) === "undefined") {
             groups[json.rows[x][this.groupField]] = [];
         }
-        groups[json.rows[x][this.groupField]].push( json.rows[x]);
+        groups[json.rows[x][this.groupField]].push(json.rows[x]);
     }
 
     for (var key in groups) {
         if (groups.hasOwnProperty(key)) {
-           var obj = groups[key];
-           if (this.startCollapsed) {plusvisible = 'visible';minusvisible='';}
-           json.groups.push({items: obj,groupname:{plusvisible:plusvisible,minusvisible:minusvisible,name:obj[0][this.groupField],cols:json.columns.length}});
+
+            var force_collapsed = false;
+            var obj = groups[key];
+
+            //if we have cookie plugin lets see if we have anything saved for this group state
+            if( (jQuery.cookie != 'undefined') && ($.cookie("richgrid-data")) ) {            
+                cookie_vars = JSON.parse($.cookie("richgrid-data"));
+                is_collapsed = cookie_vars[self.el].groups[self.id+'-rich-group-'+group_index];
+                if (typeof(is_collapsed) != "undefined") {
+                    force_collapsed = true;
+                } 
+            }
+           
+           if (this.startCollapsed || force_collapsed) {
+              plusvisible = 'visible';
+              minusvisible='';
+              //for each of the rows added to this group let's make them hidden
+              $.each(obj,function(i,o){
+                o.hidden = true;
+              });
+           } else {
+              plusvisible = '';
+              minusvisible='visible';
+           }
+
+           json.groups.push({items: obj,groupname:{rich_group_id:this.id+'-rich-group-'+group_index,plusvisible:plusvisible,minusvisible:minusvisible,name:obj[0][this.groupField],cols:json.columns.length}});
+           group_index++;
         }
     }
 
@@ -475,7 +500,7 @@ RichHTML.grid.prototype.templatePrep = function()
 		colCount++;
 	});
 
-	cols = "<tr class='{{#getcollapsedstate}}{{/getcollapsedstate}}' id='{{#getrowid}}{{/getrowid}}'>"+cols+"</tr>";
+	cols = "<tr {{#hidden}}style='display:none;'{{/hidden}} class='{{#getcollapsedstate}}{{/getcollapsedstate}}' id='{{#getrowid}}{{/getrowid}}'>"+cols+"</tr>";    
 	if (self.hasExpander) {
 		cols += "<tr class='expander-row' id='{{#expanderrowid}}{{/expanderrowid}}' style='display:none;'>";
 		cols += "<td colspan='"+(colCount)+"'><div class='pointer' boundto='{{#getlastextenderid}}{{/getlastextenderid}}' />";
@@ -731,6 +756,11 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
                 $(this).siblings().filter('.rich-grouptoggle').show();
                 $(this).hide();
                 $(this).parent().parent().nextUntil(".rich-group-row").toggle();
+                group_id = $(this).parent().parent().attr('id');
+                group_visible = $(this).parent().parent().find('.rich-grouptoggle-minus').is(":visible");
+
+                //if we have cookie enabled let's save this information
+                self.set_cookie({'action':'group',data:{group_id: group_id, group_visible: group_visible}});
             });
         }
 
@@ -789,6 +819,37 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 	$(self).trigger("load",[data]).trigger("colload");
 
 };
+
+/* method that sets cookies is jquery cookie plugin is present */
+RichHTML.grid.prototype.set_cookie = function(params) {
+    var self = this;
+
+    if(jQuery.cookie == 'undefined') return;
+    if ($.cookie("richgrid-data")) {
+        cookie_vars = JSON.parse($.cookie("richgrid-data"));
+    } else {
+        cookie_vars = {};
+    }
+
+    //let's set group toggle states
+    if (params.action == "group") {
+        //let's ensure we have proper arrays and keys        
+        if (typeof (cookie_vars[self.el]) == "undefined") cookie_vars[self.el] = {};
+        if (typeof (cookie_vars[self.el]['groups']) == "undefined") cookie_vars[self.el].groups = {};
+
+        if (!params.data.group_visible) {
+           cookie_vars[self.el].groups[params.data.group_id] = "1"
+        } else {
+           delete cookie_vars[self.el].groups[params.data.group_id];
+        }
+    } else {
+        //let's set column ordering in cookie
+        //cookie_vars[self.el] = {'d':params.data.dir, 's':params.data.sort};            
+    }
+    
+    $.cookie("richgrid-data", JSON.stringify(cookie_vars));
+
+}
 
 RichHTML.grid.prototype.setMetaData = function() {
 	var self=this, meta = "";
