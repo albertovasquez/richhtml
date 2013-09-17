@@ -234,10 +234,12 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
             //if we have cookie plugin lets see if we have anything saved for this group state
             if( (jQuery.cookie != 'undefined') && ($.cookie("richgrid-data")) ) {            
                 cookie_vars = JSON.parse($.cookie("richgrid-data"));
-                is_collapsed = cookie_vars[self.el].groups[self.id+'-rich-group-'+group_index];
-                if (typeof(is_collapsed) != "undefined") {
-                    force_collapsed = true;
-                } 
+                if ( typeof(cookie_vars[self.el].groups) != "undefined") {
+                    is_collapsed = cookie_vars[self.el].groups[self.id+'-rich-group-'+group_index];
+                    if (typeof(is_collapsed) != "undefined") {
+                        force_collapsed = true;
+                    }                     
+                }
             }
            
            if (this.startCollapsed || force_collapsed) {
@@ -271,16 +273,7 @@ RichHTML.grid.prototype.reload = function (config) {
 
         params = config.params; 
         //let's see if we have jquery cookie so we can store this for next time
-        if(jQuery.cookie != 'undefined') {
-            if ($.cookie("richgrid-data")) {
-                cookie_vars = JSON.parse($.cookie("richgrid-data"));
-            } else {
-                cookie_vars = {};
-            }
-            cookie_vars[self.el] = {'d':config.params.dir, 's':config.params.sort};            
-            $.cookie("richgrid-data", JSON.stringify(cookie_vars));
-        }
-
+        self.set_cookie({'action':'sort',data:{'d':config.params.dir, 's':config.params.sort}});
     }
 
 	jQuery.extend(self.baseParams, params);
@@ -842,11 +835,16 @@ RichHTML.grid.prototype.set_cookie = function(params) {
         } else {
            delete cookie_vars[self.el].groups[params.data.group_id];
         }
-    } else {
+
+    } else if (params.action == "sort") {
         //let's set column ordering in cookie
-        //cookie_vars[self.el] = {'d':params.data.dir, 's':params.data.sort};            
+        if ( (typeof(params.data.d) == "undefined") || (typeof(params.data.s) == "undefined") ) return false;
+
+        cookie_vars[self.el]['d'] = params.data.d;
+        cookie_vars[self.el]['s'] = params.data.s;
+
     }
-    
+
     $.cookie("richgrid-data", JSON.stringify(cookie_vars));
 
 }
