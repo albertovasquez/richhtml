@@ -234,7 +234,7 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
             //if we have cookie plugin lets see if we have anything saved for this group state
             if( (jQuery.cookie != 'undefined') && ($.cookie("richgrid-data")) ) {            
                 cookie_vars = JSON.parse($.cookie("richgrid-data"));
-                if ( typeof(cookie_vars[self.el].groups) != "undefined") {
+                if ( typeof(cookie_vars[self.el]) != "undefined" && typeof(cookie_vars[self.el].groups) != "undefined") {
                     is_collapsed = cookie_vars[self.el].groups[self.id+'-rich-group-'+group_index];
                     if (typeof(is_collapsed) != "undefined") {
                         force_collapsed = true;
