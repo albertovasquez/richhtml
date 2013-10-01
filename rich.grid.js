@@ -839,6 +839,8 @@ RichHTML.grid.prototype.set_cookie = function(params) {
     } else if (params.action == "sort") {
         //let's set column ordering in cookie
         if ( (typeof(params.data.d) == "undefined") || (typeof(params.data.s) == "undefined") ) return false;
+        //let's ensure we have proper arrays and keys        
+        if (typeof (cookie_vars[self.el]) == "undefined") cookie_vars[self.el] = {};
 
         cookie_vars[self.el]['d'] = params.data.d;
         cookie_vars[self.el]['s'] = params.data.s;
