@@ -11,6 +11,7 @@ RichHTML.grid = function(config){
     this.id = null;
     this.el = null;
     this.data= null;
+    this.last_tag = 0;
     this.jsonData= null;
     this.pagingEl = null;
     this.footerEl = null;
@@ -137,6 +138,20 @@ RichHTML.grid.prototype.disable = function()
     RichHTML.mask('#'+self.id);
 };
 
+RichHTML.grid.prototype.timestamp = function(label) {
+    var self = this;
+    previous_tag = self.last_tag;
+    self.last_tag = Date.now();
+
+    if (previous_tag == 0) {
+        console.debug(label);    
+    } else {
+        elapsed = self.last_tag - previous_tag;
+        console.debug('('+ (elapsed.toFixed(0)/1000) +'s) ',label);    
+    }
+    
+}
+
 /*
 Calls data via url getJson if url exists otherwise
 uses the json passed to it
@@ -147,9 +162,13 @@ RichHTML.grid.prototype.initialLoad = function(json) {
     RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
 
+    self.last_tag = 0;
+    self.timestamp("Start InitialLoad");    
+
     if (self.url!==null) {
         RichHTML.debug(3,Array('JSON initialLoad request for data',self.baseParams));
         $.getJSON(self.url, self.baseParams, function(data) {
+            self.timestamp("Returned Json");
             RichHTML.debug(3,Array('JSON request success',data));
             if (data.error) { return false; }
             if (typeof(data[self.root]) === "undefined") {
@@ -194,6 +213,8 @@ RichHTML.grid.prototype.initialLoad = function(json) {
             }
 
             self.onLoad();
+
+            self.timestamp("End InitialLoad");
         });
     } else {
         RichHTML.debug(1,'url config param is required to populate datagrid');
@@ -265,6 +286,9 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
 RichHTML.grid.prototype.reload = function (config) {
 	var self = this,params = {};
 
+    self.last_tag = 0;
+    self.timestamp("Start Reload");
+
 	RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
 
@@ -282,6 +306,7 @@ RichHTML.grid.prototype.reload = function (config) {
 	if (self.url!==null) {
 		RichHTML.debug(3,Array('JSON reload request for data',self.baseParams));
 		$.getJSON(self.url, self.baseParams, function(data) {
+            self.timestamp("Returned Json");
             RichHTML.debug(3,Array('JSON request success',data));
             if (data.error){ return false; }
             if (typeof(data[self.root]) === "undefined") {
@@ -324,6 +349,7 @@ RichHTML.grid.prototype.reload = function (config) {
             }
 
             self.onLoad(true);
+            self.timestamp("End Reload");
         });
     } else {
         RichHTML.debug(1,Array('url config param is required to populate datagrid'));
@@ -473,7 +499,7 @@ RichHTML.grid.prototype.templatePrep = function()
 				self.columns[i].sortable = "sortable";
 				self.columns[i].sort_icon_class = "sort-icon";
 			}
-			if(typeof(val.width) !== "undefined") {
+			if(typeof(val.width) !== "undefined" && val.width != null) {
 				widthStr = self.columns[i].width.toString();
 				if( (widthStr.indexOf("px") != -1) || (widthStr === "100%") ){
 					self.columns[i].width = val.width;

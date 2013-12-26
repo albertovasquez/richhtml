@@ -181,6 +181,7 @@ RichHTML.window = function(config){
         if (e.keyCode === 27 && self.options.escClose) {
             //adding this here but not in richhtml as it is just for us
             $('.richwindow .datepicker').hide();
+            $('.richwindow .timepicker').timepicker('hideWidget');
             self.hide();
         }
     };
@@ -512,6 +513,10 @@ RichHTML.window.prototype.position = function () {
 
 RichHTML.window.prototype.hide = function () {
     var self = this;
+
+    // avoid timepicker issues remaining open issues. If there's no timepicker it doesn't matter, this won't do anything
+    $('.richwindow .timepicker').timepicker('hideWidget');
+
     if (self.options.useOverlay) {
         $('.rich-dark-overlay').fadeOut("fast", function() {
             $(this).remove();
@@ -723,6 +728,11 @@ RichHTML.window.prototype.show = function(options) {
         self.params = $.extend(self.params,options.params);
     } else {
         self.params = {};
+    }
+
+    //Temp code might remove.. trying to see if we can removebuttosn or hide submit on show
+    if (options && typeof(options.options) !== "undefined") {
+        self.options = $.extend(self.options,options.options);
     }
 
     RichHTML.debug(3,Array("Starting render for: "+self.id,self));
