@@ -181,7 +181,9 @@ RichHTML.window = function(config){
         if (e.keyCode === 27 && self.options.escClose) {
             //adding this here but not in richhtml as it is just for us
             $('.richwindow .datepicker').hide();
-            $('.richwindow .timepicker').timepicker('hideWidget');
+            if(jQuery().timepicker) {
+                $('.richwindow .timepicker').timepicker('hideWidget');
+            }
             self.hide();
         }
     };
@@ -515,7 +517,9 @@ RichHTML.window.prototype.hide = function () {
     var self = this;
 
     // avoid timepicker issues remaining open issues. If there's no timepicker it doesn't matter, this won't do anything
-    $('.richwindow .timepicker').timepicker('hideWidget');
+    if(jQuery().timepicker) {
+        $('.richwindow .timepicker').timepicker('hideWidget');
+    }
 
     if (self.options.useOverlay) {
         $('.rich-dark-overlay').fadeOut("fast", function() {
