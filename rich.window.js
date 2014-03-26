@@ -17,6 +17,7 @@ RichHTML.msgBox = function (content, config, callback)
     msgBox.options.password = false;
     msgBox.options.textarea = false;
     msgBox.options.allowblank = false;
+    msgBox.options.value = "";
 
     msgBox.confirm_buttons = {  button1:{text:"yes"}, button2:{text:"no"}, button3:{text:"cancel",type:"cancel"} };
     msgBox.prompt_buttons = {  button1:{text:"ok"}, button2:{text:"cancel",type:"cancel"} };
@@ -54,7 +55,7 @@ RichHTML.msgBox = function (content, config, callback)
                 } else if (msgBox.options.textarea) {
                     msgBox.options.content = content + "<textarea "+required+" name='value' style='width:100%;margin-top:4px;' rows='2' /></textarea>";
                 } else {
-                    msgBox.options.content = content + "<input type='text' "+required+" name='value' style='width:80%;margin-top: 4px;' />";
+                    msgBox.options.content = content + "<input type='text' "+required+" name='value' style='width:80%;margin-top: 4px;' value='"+msgBox.options.value+"' />";
                 }
             }
             break;

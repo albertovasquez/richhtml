@@ -351,6 +351,14 @@ Table Style - This is what you want
 	-webkit-font-smoothing:antialiased;
 }
 
+.richgrid-pagenavi .disabled {
+	opacity: .3;
+}
+
+.richgrid-pagenavi span.disabled:hover {
+	cursor:inherit;
+}
+
 .richgrid-pagenavi-wrapper {
 	float:right;
 	margin-top:10px;
@@ -387,6 +395,15 @@ Table Style - This is what you want
 	padding:0 5px;
 	margin:0 5px 0 1px;
 }
+
+.richgrid-pagenavi .first,
+.richgrid-pagenavi .last,
+.richgrid-pagenavi .nextpostslink,
+.richgrid-pagenavi .previouspostslink {
+	width: 27px;
+	height: 26px;
+}
+
 .richgrid-pagenavi .nextpostslink,
 .richgrid-pagenavi .previouspostslink
 {

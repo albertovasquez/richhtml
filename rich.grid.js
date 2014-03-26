@@ -18,9 +18,9 @@ RichHTML.grid = function(config){
     this.hasExpander= false;
     this.hasCheckbox= false;
     this.width= '100%';
-    this.internalTpl = "<div class='richtable'><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='width:{{width}};{{#hidecolumn}}{{hidden}}{{/hidecolumn}}'><span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div class='richgrid-pagenavi-wrapper'></div></div>";
+    this.internalTpl = "<div class='richtable'><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='width:{{width}};{{#hidecolumn}}{{hidden}}{{/hidecolumn}}'><span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
     this.tbodyTpl = "{{#groups}}{{#groupname}}<tr class='rich-group-row' id='{{rich_group_id}}'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
-    this.pagingTpl = "<div class='richgrid-pagenavi'>{navbuttons}</div>";
+    this.pagingTpl = "<div class='richgrid-pagenavi' data-items-per-page='{navpagesitemsperpage}' data-pages='{navpagescount}'>{navbuttons}</div>";
     this.columns= null;
     this.url= null;
     this.selectedColumn= null;
@@ -71,16 +71,16 @@ RichHTML.grid = function(config){
 
     //let's check to see if we have saved values from cookie
     if(jQuery.cookie != 'undefined') {
-        if ($.cookie("richgrid-data")) {
-            cookie_vars = JSON.parse($.cookie("richgrid-data"));
-            if ( typeof(cookie_vars[this.el]) != "undefined" && 
-                 typeof(cookie_vars[this.el].d) != "undefined" && 
-                 typeof(cookie_vars[this.el].s) != "undefined") 
-             {                
+        if ($.cookie("richgrid-data"+RichHTML.prefixLabel)) {
+            cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
+            if ( typeof(cookie_vars[this.el]) != "undefined" &&
+                 typeof(cookie_vars[this.el].d) != "undefined" &&
+                 typeof(cookie_vars[this.el].s) != "undefined")
+             {
                 this.baseParams.dir = cookie_vars[this.el].d;
                 this.baseParams.sort = cookie_vars[this.el].s;
             }
-        }        
+        }
     }
 
     if (config.totalProperty) {this.totalProperty = config.totalProperty;}
@@ -144,12 +144,12 @@ RichHTML.grid.prototype.timestamp = function(label) {
     self.last_tag = Date.now();
 
     if (previous_tag == 0) {
-        console.debug(label);    
+        //console.debug(label);
     } else {
         elapsed = self.last_tag - previous_tag;
-        console.debug('('+ (elapsed.toFixed(0)/1000) +'s) ',label);    
+        //console.debug('('+ (elapsed.toFixed(0)/1000) +'s) ',label);
     }
-    
+
 }
 
 /*
@@ -163,12 +163,17 @@ RichHTML.grid.prototype.initialLoad = function(json) {
     RichHTML.onPreLoad(self);
 
     self.last_tag = 0;
-    self.timestamp("Start InitialLoad");    
+    // self.timestamp("Start InitialLoad");
 
     if (self.url!==null) {
         RichHTML.debug(3,Array('JSON initialLoad request for data',self.baseParams));
         $.getJSON(self.url, self.baseParams, function(data) {
-            self.timestamp("Returned Json");
+            //lets add some code here specifically for CE
+            if (typeof(ce.parseResponse) === "function") {
+                data = ce.parseResponse(data);
+            }
+
+            // self.timestamp("Returned Json");
             RichHTML.debug(3,Array('JSON request success',data));
             if (data.error) { return false; }
             if (typeof(data[self.root]) === "undefined") {
@@ -214,7 +219,7 @@ RichHTML.grid.prototype.initialLoad = function(json) {
 
             self.onLoad();
 
-            self.timestamp("End InitialLoad");
+            // self.timestamp("End InitialLoad");
         });
     } else {
         RichHTML.debug(1,'url config param is required to populate datagrid');
@@ -236,10 +241,10 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
     var plusvisible= '';
     var groups = [];
     var group_index = 1;
-    json.groups = [];   
+    json.groups = [];
 
     //let's group them
-    for (var x=0; x< json.rows.length; x++) {        
+    for (var x=0; x< json.rows.length; x++) {
         if (typeof(groups[json.rows[x][this.groupField]]) === "undefined") {
             groups[json.rows[x][this.groupField]] = [];
         }
@@ -253,16 +258,16 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
             var obj = groups[key];
 
             //if we have cookie plugin lets see if we have anything saved for this group state
-            if( (jQuery.cookie != 'undefined') && ($.cookie("richgrid-data")) ) {            
-                cookie_vars = JSON.parse($.cookie("richgrid-data"));
+            if( (jQuery.cookie != 'undefined') && ($.cookie("richgrid-data"+RichHTML.prefixLabel)) ) {
+                cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
                 if ( typeof(cookie_vars[self.el]) != "undefined" && typeof(cookie_vars[self.el].groups) != "undefined") {
                     is_collapsed = cookie_vars[self.el].groups[self.id+'-rich-group-'+group_index];
                     if (typeof(is_collapsed) != "undefined") {
                         force_collapsed = true;
-                    }                     
+                    }
                 }
             }
-           
+
            if (this.startCollapsed || force_collapsed) {
               plusvisible = 'visible';
               minusvisible='';
@@ -287,15 +292,15 @@ RichHTML.grid.prototype.reload = function (config) {
 	var self = this,params = {};
 
     self.last_tag = 0;
-    self.timestamp("Start Reload");
+    // self.timestamp("Start Reload");
 
 	RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
 
 	//lets see if we are passing any new params
-	if (config && (typeof(config.params) !== "undefined")) { 
+	if (config && (typeof(config.params) !== "undefined")) {
 
-        params = config.params; 
+        params = config.params;
         //let's see if we have jquery cookie so we can store this for next time
         self.set_cookie({'action':'sort',data:{'d':config.params.dir, 's':config.params.sort}});
     }
@@ -306,7 +311,13 @@ RichHTML.grid.prototype.reload = function (config) {
 	if (self.url!==null) {
 		RichHTML.debug(3,Array('JSON reload request for data',self.baseParams));
 		$.getJSON(self.url, self.baseParams, function(data) {
-            self.timestamp("Returned Json");
+            // self.timestamp("Returned Json");
+
+            //lets add some code here specifically for CE
+            if (typeof(ce.parseResponse) === "function") {
+                data = ce.parseResponse(data);
+            }
+
             RichHTML.debug(3,Array('JSON request success',data));
             if (data.error){ return false; }
             if (typeof(data[self.root]) === "undefined") {
@@ -349,7 +360,7 @@ RichHTML.grid.prototype.reload = function (config) {
             }
 
             self.onLoad(true);
-            self.timestamp("End Reload");
+            // self.timestamp("End Reload");
         });
     } else {
         RichHTML.debug(1,Array('url config param is required to populate datagrid'));
@@ -461,7 +472,7 @@ RichHTML.grid.prototype.mouseCoords = function(ev){
 
 RichHTML.grid.prototype.templatePrep = function()
 {
-	var self = this, cols = "", colCount = 0, expanderDataIndex = "", expanderRenderer = "", itemIndex = "", richid = "", widthStr;
+	var self = this, cols = "", colCount = 0, expandercolCount = 0, expanderDataIndex = "", expanderRenderer = "", itemIndex = "", richid = "", widthStr;
 
 	if (self.columns === null) {
 		RichHTML.debug(1,Array('You need to define columns array'));
@@ -492,9 +503,9 @@ RichHTML.grid.prototype.templatePrep = function()
 		} else if (val.xtype === "drag") {
 			self.columns[i].width = "23px";
 			self.isDraggable = true;
-			cols += "<td class='draghandle' id='{{#cellid}}{{/cellid}}'><div class='drag-icon'></div></td>";
+			cols += "<td class='draghandle' id='{{#cellid}}{{/cellid}}' valign='top'><div class='drag-icon'></div></td>";
 		} else if (val.dataIndex) {
-			hiddenstyle = (val.hidden) ? "visibility:hidden;" : "";
+			hiddenstyle = (val.hidden) ? "display:none;" : "";
 			if(typeof(val.sortable) !== "undefined" && val.sortable) {
 				self.columns[i].sortable = "sortable";
 				self.columns[i].sort_icon_class = "sort-icon";
@@ -517,12 +528,13 @@ RichHTML.grid.prototype.templatePrep = function()
 			cols += "<td id='{{#cellid}}{{/cellid}}' style='overflow: visible;"+hiddenstyle+"' class='"+( (typeof(val.align) !== "undefined") ? val.align : "left")+"' "+richid+"  dataindex='"+val.dataIndex+"' valign='top'>{{#"+colCount+"-rich-renderer}}{{#getlastcellid}}{{/getlastcellid}}{||}{{"+itemIndex+"}}{{/"+colCount+"-rich-renderer}}</td>";
 		}
 		colCount++;
+        if (!val.hidden) expandercolCount++;
 	});
 
-	cols = "<tr {{#hidden}}style='display:none;'{{/hidden}} class='{{#getcollapsedstate}}{{/getcollapsedstate}}' id='{{#getrowid}}{{/getrowid}}'>"+cols+"</tr>";    
+	cols = "<tr {{#hidden}}style='display:none;'{{/hidden}} class='{{#getcollapsedstate}}{{/getcollapsedstate}}' id='{{#getrowid}}{{/getrowid}}'>"+cols+"</tr>";
 	if (self.hasExpander) {
 		cols += "<tr class='expander-row' id='{{#expanderrowid}}{{/expanderrowid}}' style='display:none;'>";
-		cols += "<td colspan='"+(colCount)+"'><div class='pointer' boundto='{{#getlastextenderid}}{{/getlastextenderid}}' />";
+		cols += "<td colspan='"+(expandercolCount)+"'><div class='pointer' boundto='{{#getlastextenderid}}{{/getlastextenderid}}' />";
 		cols += "<div class='expander-data' id='{{#cellid}}{{/cellid}}'>{{#"+expanderRenderer+"}}{{#getlastextenderid}}{{/getlastextenderid}}{||}{{"+expanderDataIndex+"}}{{/"+expanderRenderer+"}}</div>";
 		cols += "</td></tr>";
 	}
@@ -554,7 +566,7 @@ RichHTML.grid.prototype.dataPrep = function()
     json.hidecolumn = function (){
         return function (text, render) {
             if(text==="true"){
-                return "visibility:hidden;";
+                return "display:none;";
             }else{
                 return "";
             }
@@ -605,23 +617,31 @@ RichHTML.grid.prototype.columnRender = function () {
         }
 
         self.selectedColumn = $(this).attr('dataindex');
-        if (event.dosort) {        
+        if (event.dosort) {
          self.reload({"params":{"start":0,"dir":dir,"sort":self.selectedColumn}});
         }
     });
 };
 
 
-RichHTML.grid.prototype.getRowValues = function(colId){
+RichHTML.grid.prototype.getRowValues = function(colId, justtext){
     var self = this, arrayofids = [], i;
+
+    if (typeof(justtext) == "undefined") {
+        justtext = true;
+    }
 
     rows = $("#"+self.id+" tr td[data-localid='"+colId+"']");
     for (i=0; i<rows.length; i++) {
-        arrayofids[i] = rows[i].innerHTML;
+        if (justtext) {
+            arrayofids[i] = $(rows[i]).text();
+        } else {
+            arrayofids[i] = rows[i].innerHTML;
+        }
+
     }
     return arrayofids;
 };
-
 
 /*
 After render event click additions to make expander and checkboxes work
@@ -727,14 +747,17 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 			loopstart=Array.max(Array(1,self.pagingData.page));
 			loopend=Array.min(Array(self.pagingData.page,self.pagingData.pages));
 
-
 			if (loopstart!==1 && (self.pagingData.page > 2)) {
 				buttonshtml += "<span class='first' data-"+self.id+"-link='0'></span>";
-			}
+			} else {
+                buttonshtml += "<span class='first disabled' data-"+self.id+"-link='0'></span>";
+            }
 
 			if (self.pagingData.page > 1) {
 				buttonshtml += "<span data-"+self.id+"-link='"+((self.pagingData.page-2)*self.baseParams.limit)+"' class='previouspostslink'></span>";
-			}
+			} else {
+                buttonshtml += "<span data-"+self.id+"-link='"+((self.pagingData.page-2)*self.baseParams.limit)+"' class='previouspostslink disabled'></span>";
+            }
 
 			/* Loop through the total pages */
 			for(i = loopstart; i <= loopend; i++)
@@ -746,23 +769,34 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 			if(self.pagingData.page < self.pagingData.pages)
 			{
 				buttonshtml += "<span class='nextpostslink' data-"+self.id+"-link='"+(self.pagingData.page*self.baseParams.limit)+"'></span>";
-			}
+			} else {
+                buttonshtml += "<span class='nextpostslink disabled' data-"+self.id+"-link='"+(self.pagingData.page*self.baseParams.limit)+"'></span>";
+            }
 
 			if (loopend !== self.pagingData.pages) {
 				buttonshtml += "<span class='last' data-"+self.id+"-link='"+((self.pagingData.pages-1)*self.baseParams.limit)+"'></span>";
-			}
+			} else {
+                buttonshtml += "<span class='last disabled' data-"+self.id+"-link='"+((self.pagingData.pages-1)*self.baseParams.limit)+"'></span>";
+            }
 
 			//lets show paging only if more than one page
 			if (self.pagingData.pages>1) {
 				paginghtml = RichHTML.replaceAll(self.pagingTpl,"{navbuttons}",buttonshtml);
-				if (self.pagingEl !== null){ $("#"+self.pagingEl).html(paginghtml);}
-				else { $("#"+self.id).parent().children(".richgrid-pagenavi-wrapper").html(paginghtml);}
+                paginghtml = RichHTML.replaceAll(paginghtml,"{navpagescount}",self.pagingData.pages);
+                paginghtml = RichHTML.replaceAll(paginghtml,"{navpagesitemsperpage}",self.baseParams.limit);
+
+				if (self.pagingEl !== null){
+                    $("#"+self.pagingEl).html(paginghtml);
+                } else {
+                    $("#"+self.id).parent().children(".richgrid-pagenavi-wrapper").html(paginghtml);
+                }
 			}else{
 				if (self.pagingEl !== null){ $("#"+self.pagingEl).html("");}
 				else { $("#"+self.id).parent().children(".richgrid-pagenavi-wrapper").html("");}
 			}
 
-			$("*[data-"+self.id+"-link]").bind("click",function(){
+            $(document).on("click","*[data-"+self.id+"-link]:not(.disabled)",function(){
+                $(document).off("click","*[data-"+self.id+"-link]:not(.disabled)");
 				self.reload({params:{start:$(this).attr("data-"+self.id+"-link")}});
 			});
 
@@ -844,15 +878,15 @@ RichHTML.grid.prototype.set_cookie = function(params) {
     var self = this;
 
     if(jQuery.cookie == 'undefined') return;
-    if ($.cookie("richgrid-data")) {
-        cookie_vars = JSON.parse($.cookie("richgrid-data"));
+    if ($.cookie("richgrid-data"+RichHTML.prefixLabel)) {
+        cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
     } else {
         cookie_vars = {};
     }
 
     //let's set group toggle states
     if (params.action == "group") {
-        //let's ensure we have proper arrays and keys        
+        //let's ensure we have proper arrays and keys
         if (typeof (cookie_vars[self.el]) == "undefined") cookie_vars[self.el] = {};
         if (typeof (cookie_vars[self.el]['groups']) == "undefined") cookie_vars[self.el].groups = {};
 
@@ -865,7 +899,7 @@ RichHTML.grid.prototype.set_cookie = function(params) {
     } else if (params.action == "sort") {
         //let's set column ordering in cookie
         if ( (typeof(params.data.d) == "undefined") || (typeof(params.data.s) == "undefined") ) return false;
-        //let's ensure we have proper arrays and keys        
+        //let's ensure we have proper arrays and keys
         if (typeof (cookie_vars[self.el]) == "undefined") cookie_vars[self.el] = {};
 
         cookie_vars[self.el]['d'] = params.data.d;
@@ -873,7 +907,7 @@ RichHTML.grid.prototype.set_cookie = function(params) {
 
     }
 
-    $.cookie("richgrid-data", JSON.stringify(cookie_vars));
+    $.cookie("richgrid-data"+RichHTML.prefixLabel, JSON.stringify(cookie_vars));
 
 }
 

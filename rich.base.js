@@ -13,6 +13,7 @@ var RichHTML = {
         minor: 0,
         patch: 0
     },
+    prefixLabel: '',
     debugLvl: 1
 };
 
@@ -88,14 +89,15 @@ RichHTML.apply = function (o, c, defaults) {
               display : ''
             });
 
+
             if (fade) $("#richhtml-overlay").fadeIn('slow');
             else $("#richhtml-overlay").show();
         },
         onPreLoad: function(el) {
-            $(this).trigger('preload');
+            $(this).trigger('preload', el);
         },
         onPostLoad: function(el) {
-            $(this).trigger('postload');
+            $(this).trigger('postload', el);
         },
         unMask: function() {
             $("#richhtml-overlay").fadeOut();

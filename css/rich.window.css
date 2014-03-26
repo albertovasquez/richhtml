@@ -1,7 +1,7 @@
 #richhtml-overlay {
-    position: relative;
-    -moz-opacity: 0.4;
-    opacity:.40;
+    position: absolute;
+    -moz-opacity: 0.3;
+    opacity:.30;
     filter: alpha(opacity=40);
     background-color: #888;
     display : none;
@@ -10,8 +10,8 @@
 
 #richhtml-overlay-inner {
     position: relative;
-    -moz-opacity: 0.4;
-    opacity:.40;
+    -moz-opacity: 0.3;
+    opacity:.30;
     filter: alpha(opacity=40);
     background-color: #888;
     display : none;
