@@ -178,3 +178,32 @@ Array.min = function( array ) {
 $.fn.hasAttr = function(prop, val) {
     return ($(this).attr(prop.toLowerCase()) === val.toLowerCase());
 };
+
+// replace this to hook up to your own lang lib
+if (!lang) {
+    function _sprintf(s) {
+        var re = /%/;
+        var i = 0;
+        while (re.test(s))
+        {
+           s = s.replace(re, _sprintf.arguments[++i]);
+        }
+
+        return s;
+    }
+
+    function lang() {
+        switch (lang.arguments.length) {
+            case 1:
+                return phrase;
+            case 2:
+                return _sprintf(phrase, lang.arguments[1]);
+            case 3:
+                return _sprintf(phrase, lang.arguments[1], lang.arguments[2]);
+            case 4:
+                return _sprintf(language[phrase], lang.arguments[1], lang.arguments[2], lang.arguments[3]);
+        }
+
+        return phrase;
+    }
+}
