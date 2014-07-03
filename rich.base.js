@@ -201,7 +201,7 @@ if (typeof lang !== 'function') {
             case 3:
                 return _sprintf(phrase, lang.arguments[1], lang.arguments[2]);
             case 4:
-                return _sprintf(language[phrase], lang.arguments[1], lang.arguments[2], lang.arguments[3]);
+                return _sprintf(phrase, lang.arguments[1], lang.arguments[2], lang.arguments[3]);
         }
 
         return phrase;
