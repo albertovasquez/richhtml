@@ -21,6 +21,7 @@
 
 .richtable {
 	margin-bottom: 10px;
+	position: relative;
 }
 
 .richtable table,
@@ -108,6 +109,10 @@ Table Style - This is what you want
 	background-image: url(../images/grid/row-expand-sprite-ne.gif);
 }
 
+.richtable table tbody .expander-icon.expander-icon-expanded:hover {
+	background-position: -48px 1px;
+}
+
 .richtable table tbody .checkbox-icon{
 	cursor: pointer;
 	height: 15px;
@@ -168,6 +173,7 @@ Table Style - This is what you want
 	border-right: 1px solid #D0D0D0;
 	white-space:nowrap;
         text-shadow: 1px 1px 0px #fff;
+        width: 100%;
 }
 
 .richtable table th.expander,
@@ -196,6 +202,89 @@ Table Style - This is what you want
   background-position: -17px -32px;
   padding-right: 0px;
   padding-left:12px;
+}
+
+.richtable table th.editable span {
+	position: relative;
+	top: 5px;
+}
+
+.richtable table th.editable div.edit-icon {
+
+	background-color: #535353;
+	position: relative;
+	top: 0px;
+	float: right;
+	height: 30px;
+	margin: 0;
+	margin-left: 5px;
+	right: -10px;
+	width: 16px;
+	font-size: 9px;
+	color: white;
+	text-align: center;
+
+}
+
+.edit_menu {
+	text-align: left;
+	display: none;
+	border-top: 3px solid #535353;
+	background-color: #9C9C9C;
+	color: rgba(255, 255, 255, 0.8);
+	width: 190px;
+	min-height: 10px;
+	font-size: 15px;
+	font-weight: 300;
+	position: absolute;
+	margin-top: 32px;
+	right: 0;
+	z-index: 1;
+	padding-bottom: 2px;
+	border-bottom: 1px solid #f90;
+}
+
+.edit_menu p {
+	padding: 0 0 0 25px;
+	line-height: 30px;
+	border-bottom: 1px solid #929292;
+	border-top: 1px solid #ADADAD;
+}
+
+.edit_menu p:hover
+{
+	background: #f90;
+	color: #FFFFFF;
+	cursor: pointer;
+	border-bottom: 1px solid #C98800;
+}
+
+.edit_menu input[type='checkbox'] {
+	margin-right: 7px;
+	margin-left: -10px;
+	position: relative;
+	top: -3px;
+}
+
+.extra_th {
+	width: 100%;
+	display: none;
+}
+
+.extra_td {
+	overflow: visible;
+	display: none;
+	width: 100%;
+}
+
+.richtable table th.editable div.edit-icon:hover {
+	background-color: #888;
+	cursor: pointer;
+}
+
+.richtable table th.editable div.edit-icon:before {
+	top: 6px;
+	position: relative;
 }
 
 .richtable table th.sortable span.sort-icon-desc {
@@ -236,6 +325,11 @@ Table Style - This is what you want
 .richtable table th.left,
 .richtable table td.left {
 	text-align: left;
+}
+
+.richtable table th.flexing {
+	width: 100% !important;
+	/*display: block;*/
 }
 
 .richtable table tr td:first-child{
@@ -426,6 +520,7 @@ Table Style - This is what you want
 	text-shadow:0 1px 0 #585858;
 	color:#fff;
 	background-position:-140px 0;
+	margin-right:1px;
 }
 
 .richgrid-pagenavi span.current:hover {
