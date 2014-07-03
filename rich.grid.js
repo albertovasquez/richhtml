@@ -18,12 +18,13 @@ RichHTML.grid = function(config){
     this.hasExpander= false;
     this.hasCheckbox= false;
     this.width= '100%';
-    this.internalTpl = "<div class='richtable'><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='width:{{width}};{{#hidecolumn}}{{hidden}}{{/hidecolumn}}'><span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
+    this.internalTpl = "<div class='richtable'><div class='edit_menu'>Loading ...</div><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}} {{editable}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='{{#width}}width:{{width}};{{/width}}{{#hidecolumn}}{{hidden}}{{/hidecolumn}}' {{#hasCheckbox}}data-checkbox='true'{{/hasCheckbox}}>{{#editable_menu}}<div class='{{edit_icon_class}}' data-rich-icon='&#xe600;'></div>{{/editable_menu}}<span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
     this.tbodyTpl = "{{#groups}}{{#groupname}}<tr class='rich-group-row' id='{{rich_group_id}}'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
     this.pagingTpl = "<div class='richgrid-pagenavi' data-items-per-page='{navpagesitemsperpage}' data-pages='{navpagescount}'>{navbuttons}</div>";
     this.columns= null;
     this.url= null;
     this.selectedColumn= null;
+    this.editable = false;
     this.groupField = null,
     this.startCollapsed = false,
     this.baseParams= {
@@ -41,7 +42,7 @@ RichHTML.grid = function(config){
         scrollAmount: 5,
         savedY: 0
     };
-    this.emptyText= lang("No data found");
+    this.emptyText= "No data found";
     this.pagingData= [];
 
     //lets populate the config params if passed
@@ -51,11 +52,18 @@ RichHTML.grid = function(config){
     if (config.startCollapsed) { this.startCollapsed = config.startCollapsed;}
     if (config.id) {this.id = config.id;}
     else {this.id = this.getId();}
-    if (config.columns) {this.columns = config.columns;}
+    if (config.editable) {this.editable = config.editable;}
     if (config.url) {this.url = config.url;}
     if (config.root) {this.root = config.root;}
     if (config.data) {this.data = config.data;}
     if (config.pagingEl) {this.pagingEl = config.pagingEl;}
+    if (config.columns) {this.columns = config.columns;}
+
+    this.columns.push({
+            id:         "extra_th",
+            dataIndex:  "extra_th",
+            xtype:      "extra_th"
+        });
 
     //define meta element we need to check if it exists when adding the content
     //as customer might have not wanted it if he didn't send it
@@ -126,6 +134,133 @@ RichHTML.grid.prototype.render = function () {
     self.initialLoad(json);
 };
 
+
+/**
+ * toggle column viewing and set to cache
+ * @param  {[type]} colId [description]
+ * @return {[type]}       [description]
+ */
+RichHTML.grid.prototype.toggleColumn = function(colId, visible){
+    var self = this, selcol;
+
+    selcol = $("#"+self.id+" tbody tr:not(.rich-group-row) td[dataindex='"+colId+"']");
+    selth = $("#"+self.id+" th[data-checkbox!=true][dataindex='"+colId+"']");
+
+    if (visible) {
+        selth.show();
+        selcol.show();
+    } else {
+        selth.hide();
+        selcol.hide();
+    }
+
+    self.postToggleColumn();
+
+};
+
+RichHTML.grid.prototype.postToggleColumn = function(){
+    var self = this, has_fullwidth_th = false, visible, flexid = null, last_visible_index=null, a_hidden = [];
+
+    $.each(self.columns,function(i, val) {
+        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag","extra_th"] ) != -1) return;
+
+        visible = $("#"+self.id+" th[data-checkbox!=true][dataindex='"+val.dataIndex+"']").is(":visible");
+        if (val.flex == 1 && visible) flexid = val.dataIndex;
+
+        if ((val.width == "100%") && (visible)) has_fullwidth_th = true;
+
+        if (visible) last_visible_index = val.dataIndex;
+
+        if (!visible) a_hidden.push(val.dataIndex);
+
+        //let's see if we need to update widths
+        // console.debug(has_fullwidth_th);
+    });
+
+
+    //let's set column widths
+    $('th.flexing').removeClass('flexing');
+    $("#"+self.id+" th[dataindex='extra_th']").hide();
+    if (!has_fullwidth_th) {
+
+        if (flexid != null) {
+            $("#"+self.id+" th[data-checkbox!=true][dataindex='"+flexid+"']").addClass('flexing');
+        } else if (last_visible_index != null) {
+            $("#"+self.id+" th[data-checkbox!=true][dataindex='"+last_visible_index+"']").addClass('flexing');
+        } else {
+            $("#"+self.id+" th[dataindex='extra_th']").show();
+        }
+
+    }
+
+    //check if we have to move edit-icon to last visible th
+    //the location should always be last visible index
+    if ($('th.editable').attr('dataindex') != last_visible_index) {
+
+        var newparent = null;
+        if (last_visible_index == null) {
+            newparent = $("#"+self.id+" th[dataindex='extra_th']");
+        } else {
+            newparent = $("#"+self.id+" th[data-checkbox!=true][dataindex='"+last_visible_index+"']");
+        }
+
+        //let's move it
+        $("#"+self.id+" th.editable .edit-icon").prependTo(newparent);
+        $("#"+self.id+" th.editable").removeClass("editable");
+        newparent.addClass("editable");
+
+        // alert('we hid or readded last div');
+    }
+
+    //cache time
+    self.set_cookie({
+        'action':'columns',
+        data:{
+            'h':a_hidden
+        }
+    });
+
+}
+
+
+RichHTML.grid.prototype.renderEditable = function()
+{
+    var self = this, html = "";
+    //editable?
+    $.each(self.columns,function(i, val) {
+        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag","extra_th"] ) != -1) return;
+
+        if (val['hidden']) {
+            checked = "";
+        } else {
+            checked = "checked=true";
+        }
+
+        html += '<p class="edit-column-entry" data-index="'+val.dataIndex+'"><input '+checked+' type="checkbox" class="col_checkbox" val="'+val.dataIndex+'" />'+val.text+'</p>';
+    });
+
+    $('.edit_menu').html(html);
+
+    $("document").off('click');
+    $('.edit_menu p').bind('click', function(event) {
+
+        var dataIndex = null;
+        if (event.target.className !== "col_checkbox") {
+            dataIndex = $(event.target).attr('data-index');
+            checked = $(event.target).find('.col_checkbox').prop( "checked" );
+            $(event.target).find('.col_checkbox').prop( "checked" , !checked);
+            state = !checked;
+        } else {
+            dataIndex = $(event.target).parent().attr('data-index');
+            state = $(event.target).prop( "checked" );
+        }
+
+        self.toggleColumn(dataIndex, state);
+
+    });
+
+}
+
 RichHTML.grid.prototype.enable = function()
 {
     var self = this;
@@ -161,6 +296,7 @@ RichHTML.grid.prototype.initialLoad = function(json) {
 
     RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
+    self.setColumns();
 
     self.last_tag = 0;
     // self.timestamp("Start InitialLoad");
@@ -288,6 +424,30 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
     return json;
 };
 
+RichHTML.grid.prototype.setColumns = function (config) {
+
+    var self = this;
+
+    if(jQuery.cookie != 'undefined') {
+        if ($.cookie("richgrid-data"+RichHTML.prefixLabel)) {
+            cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
+            if ( typeof(cookie_vars[this.el]) != "undefined" &&
+                 typeof(cookie_vars[this.el].hidden) != "undefined")
+             {
+                hidden = cookie_vars[this.el].hidden;
+                console.debug(hidden);
+                $.each(self.columns,function(i, val) {
+                    // self.columns[i].hidden = true;
+                });
+
+            }
+        }
+    }
+
+    // console.debug(self.internalTpl);
+
+};
+
 RichHTML.grid.prototype.reload = function (config) {
 	var self = this,params = {};
 
@@ -296,6 +456,7 @@ RichHTML.grid.prototype.reload = function (config) {
 
 	RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
+    self.setColumns();
 
 	//lets see if we are passing any new params
 	if (config && (typeof(config.params) !== "undefined")) {
@@ -336,7 +497,8 @@ RichHTML.grid.prototype.reload = function (config) {
                 json.groups = [];
                 json.groups.push({items:json.rows});
 
-                $('#'+self.el+' tbody').html(Mustache.to_html(self.tbodyTpl, json).replace(/^\s*/mg, ''));
+                // $('#'+self.el+' tbody').html(Mustache.to_html(self.tbodyTpl, json).replace(/^\s*/mg, ''));
+                $('#'+self.el).html(Mustache.to_html(self.internalTpl, json).replace(/^\s*/mg, ''));
 
                 //not grouped so we do extra work to handle paging
                 //lets get total count information for paging
@@ -351,7 +513,8 @@ RichHTML.grid.prototype.reload = function (config) {
             } else {
                 //we are going to show grouped data.. lets regroup this data
                 json = self.groupOnGroupField(json);
-                $('#'+self.el+' tbody').html(Mustache.to_html(self.tbodyTpl, json).replace(/^\s*/mg, ''));
+                // $('#'+self.el+' tbody').html(Mustache.to_html(self.tbodyTpl, json).replace(/^\s*/mg, ''));
+                $('#'+self.el).html(Mustache.to_html(self.internalTpl, json).replace(/^\s*/mg, ''));
                 self.pagingData.totalItems = null;
             }
 
@@ -441,7 +604,12 @@ RichHTML.grid.prototype.getMouseOffset = function(target, ev) {
         ev = ev || window.event;
         docPos    = this.getPosition(target);
         mousePos  = this.mouseCoords(ev);
-        return {x:mousePos.x - docPos.x, y:mousePos.y - docPos.y};
+        if (docPos == null) {
+            return null;
+        } else {
+            return {x:mousePos.x - docPos.x, y:mousePos.y - docPos.y};
+        }
+
     };
 RichHTML.grid.prototype.getPosition = function(e){
         var top  = 0, left=0;
@@ -450,11 +618,17 @@ RichHTML.grid.prototype.getPosition = function(e){
         if (e.offsetHeight === 0) {
             e = e.firstChild; // a table cell
         }
+
+        if (e == null) {
+            return null;
+        }
+
         while (e.offsetParent){
             left += e.offsetLeft;
             top  += e.offsetTop;
             e     = e.offsetParent;
         }
+
         left += e.offsetLeft;
         top  += e.offsetTop;
         return {x:left, y:top};
@@ -472,7 +646,9 @@ RichHTML.grid.prototype.mouseCoords = function(ev){
 
 RichHTML.grid.prototype.templatePrep = function()
 {
-	var self = this, cols = "", colCount = 0, expandercolCount = 0, expanderDataIndex = "", expanderRenderer = "", itemIndex = "", richid = "", widthStr;
+
+	var self = this, cols = "", colCount = 0, expandercolCount = 0,
+    expanderDataIndex = "", expanderRenderer = "", itemIndex = "", richid = "", widthStr, last_visible_index = 0;
 
 	if (self.columns === null) {
 		RichHTML.debug(1,Array('You need to define columns array'));
@@ -483,7 +659,12 @@ RichHTML.grid.prototype.templatePrep = function()
 
 		if (typeof(val.hidden)==="undefined") {val.hidden = false;}
 
-		if (val.xtype === "expander") {
+        if (val.xtype === "extra_th") {
+
+            self.columns[i].width = "100%";
+            cols += "<td class='extra_td' valign='top'></td>";
+
+		} else if (val.xtype === "expander") {
 			if (val.dataIndex){
 				if (typeof(val.escapeHTML)==="undefined" || !val.escapeHTML) {
 					expanderDataIndex = "{"+val.dataIndex+"}";
@@ -500,12 +681,19 @@ RichHTML.grid.prototype.templatePrep = function()
 			self.hasCheckbox = true;
 			cols += "<td class='checkbox' id='{{#checkboxid}}{{"+itemIndex+"}}{{/checkboxid}}' {{#"+colCount+"-rich-renderer}}{{#getlastcellid}}{{/getlastcellid}}{-}{{"+itemIndex+"}}{||}{{"+itemIndex+"}}{{/"+colCount+"-rich-renderer}} valign='top'><div class='checkbox-icon'></div></td>";
 			self.columns[i].width = "28px";
+            self.columns[i].hasCheckbox = true;
 		} else if (val.xtype === "drag") {
 			self.columns[i].width = "23px";
 			self.isDraggable = true;
 			cols += "<td class='draghandle' id='{{#cellid}}{{/cellid}}' valign='top'><div class='drag-icon'></div></td>";
 		} else if (val.dataIndex) {
-			hiddenstyle = (val.hidden) ? "display:none;" : "";
+            if (val.hidden) {
+                hiddenstyle = "display:none;"
+            } else {
+                hiddenstyle = "";
+                last_visible_index = i;
+            }
+
 			if(typeof(val.sortable) !== "undefined" && val.sortable) {
 				self.columns[i].sortable = "sortable";
 				self.columns[i].sort_icon_class = "sort-icon";
@@ -516,7 +704,8 @@ RichHTML.grid.prototype.templatePrep = function()
 					self.columns[i].width = val.width;
 				} else { self.columns[i].width = val.width+"px"; }
 			} else if (!val.hidden){
-				self.columns[i].width = "100%";
+				// self.columns[i].width = "100%";
+                // self.columns[i].width = "";
 			}
 
 			//lets asssign the id we want to bind this element to
@@ -530,6 +719,12 @@ RichHTML.grid.prototype.templatePrep = function()
 		colCount++;
         if (!val.hidden) expandercolCount++;
 	});
+
+    if(typeof(self.editable) !== "undefined" && self.editable) {
+        self.columns[last_visible_index].editable = "editable";
+        self.columns[last_visible_index].editable_menu = true;
+        self.columns[last_visible_index].edit_icon_class = "edit-icon";
+    }
 
 	cols = "<tr {{#hidden}}style='display:none;'{{/hidden}} class='{{#getcollapsedstate}}{{/getcollapsedstate}}' id='{{#getrowid}}{{/getrowid}}'>"+cols+"</tr>";
 	if (self.hasExpander) {
@@ -588,10 +783,17 @@ RichHTML.grid.prototype.dataPrep = function()
 /*
 After render of columns
 */
-RichHTML.grid.prototype.columnRender = function () {
+RichHTML.grid.prototype.bindColumns = function () {
     var self = this, span, dir;
 
-    $("#"+self.id+" thead th.sortable").bind('click', function(event) {
+
+    // $("#"+self.id+" thead th.sortable").bind('click', function(event) {
+    $("body").on('click',"#"+self.id+" thead th.sortable", function(event) {
+
+        if ( event.target.className === "col_checkbox" || event.target.className === "edit-icon" || event.target.className === "edit-column-entry") {
+            return true;
+        }
+
         if(typeof(event.dosort)==="undefined"){
             event.dosort = true;
         }
@@ -621,8 +823,22 @@ RichHTML.grid.prototype.columnRender = function () {
          self.reload({"params":{"start":0,"dir":dir,"sort":self.selectedColumn}});
         }
     });
-};
 
+    //click on clock to edit grid
+    // $("th.editable div.edit-icon").bind('click', function(event) {
+    $("body").on('click',"th.editable div.edit-icon", function(event) {
+        event.preventDefault();
+        $('.edit_menu').fadeToggle("fast", function() {
+            $('.edit_menu').toggleClass('open');
+            if ($('.edit_menu').hasClass('open') && !$('.edit_menu').hasClass('populated')) {
+                self.renderEditable();
+                $('.edit_menu').addClass('populated');
+            }
+        });
+
+    });
+
+};
 
 RichHTML.grid.prototype.getRowValues = function(colId, justtext){
     var self = this, arrayofids = [], i;
@@ -660,7 +876,7 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 
 		if(typeof(reloading)==="undefined"){ reloading = false; }
 		if (!reloading) {
-			self.columnRender();
+			self.bindColumns();
 			//if default sort information is passed lets also
 			//mimic that the column was clicked
 			if (typeof(self.baseParams.sort) !== "undefined") {
@@ -673,8 +889,12 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 		}
 
 		if (self.hasExpander) {
-			$("#"+self.id+" tbody td.expander div.expander-icon").bind('click', function() {
-				$(this).toggleClass('expander-icon').toggleClass('expander-icon-expanded');
+
+            $("body").off('click',"#"+self.id+" tbody td.expander div.expander-icon");
+			$("body").on('click',"#"+self.id+" tbody td.expander div.expander-icon", function() {
+
+				// $(this).toggleClass('expander-icon').toggleClass('expander-icon-expanded');
+                $(this).toggleClass('expander-icon-expanded');
 				$(this).parent().parent().children('td').toggleClass('nobottomborder');
 				$("#"+$(this).parent().attr('id')+"-data").toggle();
 
@@ -696,15 +916,20 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 		}
 
 		if (self.isDraggable) {
-			$("#"+self.id+" tbody td.draghandle .drag-icon").mousedown(function(event) {
+            //TODO need to make this a one time binding
+
+            // $("#"+self.id+" tbody td.draghandle .drag-icon").mousedown(function(event) {
+            $("body").off("mousedown", "#"+self.id+" tbody td.draghandle .drag-icon");
+            $("body").on("mousedown", "#"+self.id+" tbody td.draghandle .drag-icon", function(event) {
 				self.mouseDown(this,event);
 				return false;
 			});
 		}
 
-
 		if (self.hasCheckbox) {
-            $("#"+self.id+" tbody td .checkbox-icon").bind('click', function(event,massclick) {
+
+            $("body").off('click',"#"+self.id+" tbody td .checkbox-icon");
+            $("body").on('click',"#"+self.id+" tbody td .checkbox-icon", function(event,massclick) {
 
                 //trigger rowselect
                 var rowid, data;
@@ -805,7 +1030,7 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
         //let's see if we have column expanders to bind
         if (self.groupField !== null)
         {
-            $('.richtable .rich-grouptoggle').bind('click',function() {
+            $("body").on('click','.richtable .rich-grouptoggle', function() {
                 $(this).siblings().filter('.rich-grouptoggle').show();
                 $(this).hide();
                 $(this).parent().parent().nextUntil(".rich-group-row").toggle();
@@ -827,11 +1052,12 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
     //bind the checkall
     if (self.hasCheckbox) {
         if(!reloading) {
-            $("#"+self.id+" thead th.checkbox").bind('click', function() {
+            $("body").on('click',"#"+self.id+" thead th.checkbox", function() {
 
                 th = this;
                 RichHTML.debug(3,Array('Clicking checkbox header',"#"+self.id));
-                if($(th).hasClass('checkbox')) {
+
+                if(!$(th).hasClass('checkbox-checked')) {
                     $("#"+self.id+" tbody td.checkbox div.checkbox-icon:not(.checkbox-icon-checked)").each(function(){
                         $(this).trigger('click',[true]);
                     });
@@ -840,7 +1066,8 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
                         $(this).trigger('click',[true]);
                     });
                 }
-                $(th).toggleClass('checkbox').toggleClass('checkbox-checked');
+                // $(th).toggleClass('checkbox').toggleClass('checkbox-checked');
+                $(th).toggleClass('checkbox-checked');
 
                 data = {};
                 data.rowid = 'all';
@@ -851,7 +1078,8 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
             });
         } else {
             //lets uncheck it since we just reloaded the grid
-            $("#"+self.id+" thead th.checkbox-checked").removeClass('checkbox-checked').addClass('checkbox');
+            // $("#"+self.id+" thead th.checkbox-checked").removeClass('checkbox-checked').addClass('checkbox');
+            $("#"+self.id+" thead th.checkbox-checked").removeClass('checkbox-checked');
         }
     }
 
@@ -902,9 +1130,17 @@ RichHTML.grid.prototype.set_cookie = function(params) {
         //let's ensure we have proper arrays and keys
         if (typeof (cookie_vars[self.el]) == "undefined") cookie_vars[self.el] = {};
 
+        //d for direction, s for sortid
         cookie_vars[self.el]['d'] = params.data.d;
         cookie_vars[self.el]['s'] = params.data.s;
 
+    } else if (params.action == "columns") {
+
+        if (typeof (cookie_vars[self.el]) == "undefined") cookie_vars[self.el] = {};
+        if (typeof (cookie_vars[self.el]['hidden']) == "undefined") cookie_vars[self.el].groups = {};
+
+        cookie_vars[self.el].hidden = params.data['h'];
+        console.debug(cookie_vars);
     }
 
     $.cookie("richgrid-data"+RichHTML.prefixLabel, JSON.stringify(cookie_vars));
@@ -914,9 +1150,9 @@ RichHTML.grid.prototype.set_cookie = function(params) {
 RichHTML.grid.prototype.setMetaData = function() {
 	var self=this, meta = "";
     if (self.pagingData.totalItems == 0) {
-        meta = lang("Displaying items: % - % of %", 0, 0, 0);
+        meta = "Displaying items: 0 - 0 of 0";
     } else if (typeof(self.pagingData.start)!=="undefined") {
-        meta = lang("Displaying items: % - % of %", self.pagingData.start + 1, self.pagingData.start + self.pagingData.items, self.pagingData.totalItems);
+        meta = "Displaying items: " + (self.pagingData.start + 1)+" - "+(self.pagingData.start + self.pagingData.items)+" of "+self.pagingData.totalItems;
     }
     if (typeof(self.metaEl) !== "undefined") { $('#'+self.metaEl).html(meta); }
 	return meta;
@@ -927,10 +1163,15 @@ RichHTML.grid.prototype.getTargetRow =  function(draggedRow, y) {
         rows = $("#"+self.id)[0].rows;
         for (i=0; i<rows.length; i++) {
             row = rows[i];
-            rowY    = self.getPosition(row).y;
+            rowY    = self.getPosition(row);
+            if (rowY == null) return null;
+            rowY = rowY.y;
             rowHeight = parseInt(row.offsetHeight,10)/2;
             if (row.offsetHeight === 0) {
-                rowY = self.getPosition(row.firstChild).y;
+                rowY = self.getPosition(row.firstChild);
+                if (rowY == null) return null;
+                rowY = rowY.y;
+
                 rowHeight = parseInt(row.firstChild.offsetHeight,10)/2;
             }
             // Because we always have to insert before, we need to offset the height a bit
@@ -950,10 +1191,16 @@ RichHTML.grid.prototype.mouseDown = function(target, event) {
 
 		self.dragData.dragObject = $(target).parent().parent();
 		self.dragData.mouseOffset = self.getMouseOffset(target, event);
+
+        if (self.dragData.mouseOffset == null) return;
+
 		RichHTML.debug(3,Array("Initializing Drag",self.dragData));
 
 		//bind to mouse move
-        $('#'+self.id).mousemove(function(ev){
+        // $('#'+self.id).mousemove(function(ev){
+        $("body").off("mousemove");
+        $("body").on("mousemove",'#'+self.id, function(ev){
+
             var expanderrow, mousePos, y, yOffset, windowHeight, movingDown, currentRow;
             if (self.dragData.dragObject === null) {
                 return;
@@ -988,6 +1235,7 @@ RichHTML.grid.prototype.mouseDown = function(target, event) {
                 }
                 //get the row we are over and update the dragobject to proper place
                 currentRow = self.getTargetRow(self.dragData.dragObject, y);
+
                 //skip if the current row is an open expander window.. we don't
                 //really want to place the row above or below an expander row
                 if (currentRow && !$('#'+currentRow.id).hasClass('expander-row')) {
@@ -1013,7 +1261,9 @@ RichHTML.grid.prototype.mouseDown = function(target, event) {
         });
 
         //bind to mouse up
-        $('#'+self.id).mouseup(function(ev){
+        // $('#'+self.id).mouseup(function(ev){
+        $("body").off("mouseup",'#'+self.id);
+        $("body").on("mouseup",'#'+self.id, function(ev){
 
             if (self.dragData.dragObject === null) {return;}
 
