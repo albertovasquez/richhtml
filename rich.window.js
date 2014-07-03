@@ -414,16 +414,16 @@ RichHTML.window.prototype.prepButtons = function() {
     } else if (buttons === '') {
         self.hasButtons = true;
         if (self.options.showSubmit) {
-            buttons += '<a href="#" class="rich-button white" id="rich-button-submit"><span class="buttontext">Submit</span></a>';
+            buttons += '<a href="#" class="rich-button white" id="rich-button-submit"><span class="buttontext">' + lang('Submit') + '</span></a>';
             if (self.options.showDelete) {
-                buttons += '<a href="#" class="rich-button white" id="rich-button-delete"><span class="buttontext">Delete</span></a>';
+                buttons += '<a href="#" class="rich-button white" id="rich-button-delete"><span class="buttontext">' + lang('Delete') + '</span></a>';
             }
-            buttons += '<a href="#" class="rich-button white" id="rich-button-autoclose"><span class="buttontext">Close</span></a>';
+            buttons += '<a href="#" class="rich-button white" id="rich-button-autoclose"><span class="buttontext">' + lang('Close') + '</span></a>';
         } else {
             if (self.options.showDelete) {
-                buttons = '<a href="#" class="rich-button white" id="rich-button-delete"><span class="buttontext">Delete</span></a>';
+                buttons = '<a href="#" class="rich-button white" id="rich-button-delete"><span class="buttontext">' + lang('Delete') + '</span></a>';
             }
-            buttons += '<a href="#" class="rich-button white" id="rich-button-autoclose"><span class="buttontext">Ok</span></a>';
+            buttons += '<a href="#" class="rich-button white" id="rich-button-autoclose"><span class="buttontext">' + lang('Ok') + '</span></a>';
         }
         self.template = RichHTML.replaceAll(self.template,"{{buttons}}",buttons);
     }else {
