@@ -232,9 +232,9 @@ Table Style - This is what you want
 	border-top: 3px solid #535353;
 	background-color: #9C9C9C;
 	color: rgba(255, 255, 255, 0.8);
-	width: 190px;
+	width: 166px;
 	min-height: 10px;
-	font-size: 15px;
+	font-size: 13px;
 	font-weight: 300;
 	position: absolute;
 	margin-top: 32px;
@@ -245,8 +245,8 @@ Table Style - This is what you want
 }
 
 .edit_menu p {
-	padding: 0 0 0 25px;
-	line-height: 30px;
+	padding: 0 0 0 22px;
+	line-height: 22px;
 	border-bottom: 1px solid #929292;
 	border-top: 1px solid #ADADAD;
 }

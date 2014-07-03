@@ -18,8 +18,10 @@ RichHTML.grid = function(config){
     this.hasExpander= false;
     this.hasCheckbox= false;
     this.width= '100%';
-    this.internalTpl = "<div class='richtable'><div class='edit_menu'>Loading ...</div><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}} {{editable}} {{#flexing}}flexing{{/flexing}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='{{#width}}width:{{width}};{{/width}}{{#hidecolumn}}{{hidden}}{{/hidecolumn}}' {{#hasCheckbox}}data-checkbox='true'{{/hasCheckbox}}>{{#editable_menu}}<div class='{{edit_icon_class}}' data-rich-icon='&#xe600;'></div>{{/editable_menu}}<span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
-    this.tbodyTpl = "{{#groups}}{{#groupname}}<tr class='rich-group-row' id='{{rich_group_id}}'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
+    this.internalTplClean = "<div class='richtable'><div class='edit_menu'>Loading ...</div><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}} {{editable}} {{#flexing}}flexing{{/flexing}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='{{#width}}width:{{width}};{{/width}}{{#hidecolumn}}{{hidden}}{{/hidecolumn}}' {{#hasCheckbox}}data-checkbox='true'{{/hasCheckbox}}>{{#editable_menu}}<div class='{{edit_icon_class}}' data-rich-icon='&#xe600;'></div>{{/editable_menu}}<span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
+    this.tbodyTplClean = "{{#groups}}{{#groupname}}<tr class='rich-group-row' id='{{rich_group_id}}'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
+    this.internalTpl = null;
+    this.tbodyTpl = null;
     this.pagingTpl = "<div class='richgrid-pagenavi' data-items-per-page='{navpagesitemsperpage}' data-pages='{navpagescount}'>{navbuttons}</div>";
     this.columns= null;
     this.url= null;
@@ -128,9 +130,11 @@ RichHTML.grid.prototype.render = function () {
  * @return {[type]}       [description]
  */
 RichHTML.grid.prototype.toggleColumn = function(colId, visible){
-    var self = this, selcol;
+    var self = this, a_hidden = [];
 
     $.each(self.columns,function(i, val) {
+
+        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag", "extra_th"] ) != -1) return;
 
         if (colId == val.dataIndex) {
             if (visible) {
@@ -140,75 +144,26 @@ RichHTML.grid.prototype.toggleColumn = function(colId, visible){
             }
         }
 
-    });
+        if (self.columns[i].hidden) a_hidden.push(val.dataIndex);
 
-    self.postToggleColumn(true);
-
-};
-
-RichHTML.grid.prototype.postToggleColumn = function(cache){
-    var self = this, has_fullwidth_th = false, visible, flexid = null, last_visible_index=null, a_hidden = [];
-
-    $.each(self.columns,function(i, val) {
-
-        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag", "extra_th"] ) != -1) return;
-        visible = !self.columns[i].hidden;
-
-        if (val.flex == 1 && visible) flexid = val.dataIndex;
-        if ( (val.width == "100%") && (visible)) has_fullwidth_th = true;
-        if (visible) last_visible_index = val.dataIndex;
-        if (!visible && cache) a_hidden.push(val.dataIndex);
 
     });
 
-    //let's set column widths
-    $('th.flexing').removeClass('flexing');
-    $("#"+self.id+" th[dataindex='extra_th']").hide();
-    if (!has_fullwidth_th) {
-        if (flexid != null) {
-            $("#"+self.id+" th[data-checkbox!=true][dataindex='"+flexid+"']").addClass('flexing');
-        } else if (last_visible_index != null) {
-            $("#"+self.id+" th[data-checkbox!=true][dataindex='"+last_visible_index+"']").addClass('flexing');
-        } else {
-            $("#"+self.id+" th[dataindex='extra_th']").show();
-        }
-    }
-
-    //check if we have to move edit-icon to last visible th
-    //the location should always be last visible index
-    if ($('th.editable').attr('dataindex') != last_visible_index) {
-
-        var newparent = null;
-        if (last_visible_index == null) {
-            newparent = $("#"+self.id+" th[dataindex='extra_th']");
-        } else {
-            newparent = $("#"+self.id+" th[data-checkbox!=true][dataindex='"+last_visible_index+"']");
-        }
-
-        //let's move it
-        $("#"+self.id+" th.editable .edit-icon").prependTo(newparent);
-        $("#"+self.id+" th.editable").removeClass("editable");
-        newparent.addClass("editable");
-
-        // alert('we hid or readded last div');
-    }
 
     //we just perfomed a column selection
     //so let's cache it
-    if (cache) {
-        //cache time
-        self.set_cookie({
-            'action':'columns',
-            data:{
-                'h':a_hidden
-            }
-        });
+    self.set_cookie({
+        'action':'columns',
+        data:{
+            'h':a_hidden
+        }
+    });
 
-    }
+
 
     self.reload();
 
-}
+};
 
 
 RichHTML.grid.prototype.renderEditable = function()
@@ -705,13 +660,14 @@ RichHTML.grid.prototype.templatePrep = function()
 			cols += "<td class='draghandle' id='{{#cellid}}{{/cellid}}' valign='top'><div class='drag-icon'></div></td>";
 		} else if (val.dataIndex) {
 
+            self.columns[i].editable_menu = false;
+            self.columns[i].editable = "";
+
             if (val.hidden) {
                 hiddenstyle = "display:none;"
             } else {
                 hiddenstyle = "";
             }
-
-            console.debug(val.dataIndex, val.hidden, hiddenstyle);
 
 			if(typeof(val.sortable) !== "undefined" && val.sortable) {
 				self.columns[i].sortable = "sortable";
@@ -757,7 +713,7 @@ RichHTML.grid.prototype.templatePrep = function()
 
 
     if (!has_fullwidth_th) {
-        console.debug('need to cleean', flexid, last_visible_index);
+
         if (flexid != null) {
             self.columns[flexid].flexing = true;
         } else if (last_visible_index != null) {
@@ -777,10 +733,10 @@ RichHTML.grid.prototype.templatePrep = function()
 		cols += "</td></tr>";
 	}
 
-	self.tbodyTpl = RichHTML.replaceAll(self.tbodyTpl,"{row-data}",cols);
+	self.tbodyTpl = RichHTML.replaceAll(self.tbodyTplClean,"{row-data}",cols);
 
 	//append template data
-	self.internalTpl = RichHTML.replaceAll(self.internalTpl,"{rich-id}",this.getId());
+	self.internalTpl = RichHTML.replaceAll(self.internalTplClean,"{rich-id}",this.getId());
 	self.internalTpl = RichHTML.replaceAll(self.internalTpl,"{tablestyle}","width:"+this.width);
 	self.internalTpl = RichHTML.replaceAll(self.internalTpl,"{footer-colspan}",colCount);
 	self.internalTpl = RichHTML.replaceAll(self.internalTpl,"{tbody}",self.tbodyTpl);
