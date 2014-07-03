@@ -18,7 +18,7 @@ RichHTML.grid = function(config){
     this.hasExpander= false;
     this.hasCheckbox= false;
     this.width= '100%';
-    this.internalTpl = "<div class='richtable'><div class='edit_menu'>Loading ...</div><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}} {{editable}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='{{#width}}width:{{width}};{{/width}}{{#hidecolumn}}{{hidden}}{{/hidecolumn}}' {{#hasCheckbox}}data-checkbox='true'{{/hasCheckbox}}>{{#editable_menu}}<div class='{{edit_icon_class}}' data-rich-icon='&#xe600;'></div>{{/editable_menu}}<span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
+    this.internalTpl = "<div class='richtable'><div class='edit_menu'>Loading ...</div><table id='{rich-id}' style='table-layout: fixed;{tablestyle}'><thead><tr>{{#columns}}<th nowrap='nowrap' rowspan='1' colspan='1' class='{{align}} {{sortable}} {{xtype}} {{editable}} {{#flexing}}flexing{{/flexing}}' {{#getsortfieldname}}{{sortFieldName}}{{/getsortfieldname}} dataindex='{{dataIndex}}' style='{{#width}}width:{{width}};{{/width}}{{#hidecolumn}}{{hidden}}{{/hidecolumn}}' {{#hasCheckbox}}data-checkbox='true'{{/hasCheckbox}}>{{#editable_menu}}<div class='{{edit_icon_class}}' data-rich-icon='&#xe600;'></div>{{/editable_menu}}<span class='{{sort_icon_class}}'>{{text}}&nbsp;</span></th>{{/columns}}</tr></thead><tbody>{tbody}</tbody><tfoot class='light rich-footer'><tr><th colspan='{footer-colspan}' id='{rich-id}-footer'></th></tr></tfoot></table><div id='{rich-id}-navigation' class='richgrid-pagenavi-wrapper'></div></div>";
     this.tbodyTpl = "{{#groups}}{{#groupname}}<tr class='rich-group-row' id='{{rich_group_id}}'><td class='rich-group-name' colspan={{cols}}><span class='rich-grouptoggle rich-grouptoggle-plus {{plusvisible}}' data-rich-icon='&#xe001;' /><span class='rich-grouptoggle rich-grouptoggle-minus {{minusvisible}}' data-rich-icon='&#xe000;' />{{{name}}}</td></tr>{{/groupname}}{{#items}}{row-data}{{/items}}{{/groups}}";
     this.pagingTpl = "<div class='richgrid-pagenavi' data-items-per-page='{navpagesitemsperpage}' data-pages='{navpagescount}'>{navbuttons}</div>";
     this.columns= null;
@@ -77,20 +77,6 @@ RichHTML.grid = function(config){
     if (config.emptyText) {this.emptyText = config.emptyText;}
     if (config.baseParams) {jQuery.extend(this.baseParams, config.baseParams);}
 
-    //let's check to see if we have saved values from cookie
-    if(jQuery.cookie != 'undefined') {
-        if ($.cookie("richgrid-data"+RichHTML.prefixLabel)) {
-            cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
-            if ( typeof(cookie_vars[this.el]) != "undefined" &&
-                 typeof(cookie_vars[this.el].d) != "undefined" &&
-                 typeof(cookie_vars[this.el].s) != "undefined")
-             {
-                this.baseParams.dir = cookie_vars[this.el].d;
-                this.baseParams.sort = cookie_vars[this.el].s;
-            }
-        }
-    }
-
     if (config.totalProperty) {this.totalProperty = config.totalProperty;}
 
 };
@@ -132,6 +118,7 @@ RichHTML.grid.prototype.render = function () {
     $('#'+self.el).html(Mustache.to_html(self.internalTpl, json).replace(/^\s*/mg, ''));
 
     self.initialLoad(json);
+
 };
 
 
@@ -143,46 +130,41 @@ RichHTML.grid.prototype.render = function () {
 RichHTML.grid.prototype.toggleColumn = function(colId, visible){
     var self = this, selcol;
 
-    selcol = $("#"+self.id+" tbody tr:not(.rich-group-row) td[dataindex='"+colId+"']");
-    selth = $("#"+self.id+" th[data-checkbox!=true][dataindex='"+colId+"']");
+    $.each(self.columns,function(i, val) {
 
-    if (visible) {
-        selth.show();
-        selcol.show();
-    } else {
-        selth.hide();
-        selcol.hide();
-    }
+        if (colId == val.dataIndex) {
+            if (visible) {
+                self.columns[i].hidden = false;
+            } else {
+                self.columns[i].hidden = true;
+            }
+        }
 
-    self.postToggleColumn();
+    });
+
+    self.postToggleColumn(true);
 
 };
 
-RichHTML.grid.prototype.postToggleColumn = function(){
+RichHTML.grid.prototype.postToggleColumn = function(cache){
     var self = this, has_fullwidth_th = false, visible, flexid = null, last_visible_index=null, a_hidden = [];
 
     $.each(self.columns,function(i, val) {
-        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag","extra_th"] ) != -1) return;
 
-        visible = $("#"+self.id+" th[data-checkbox!=true][dataindex='"+val.dataIndex+"']").is(":visible");
+        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag", "extra_th"] ) != -1) return;
+        visible = !self.columns[i].hidden;
+
         if (val.flex == 1 && visible) flexid = val.dataIndex;
-
-        if ((val.width == "100%") && (visible)) has_fullwidth_th = true;
-
+        if ( (val.width == "100%") && (visible)) has_fullwidth_th = true;
         if (visible) last_visible_index = val.dataIndex;
+        if (!visible && cache) a_hidden.push(val.dataIndex);
 
-        if (!visible) a_hidden.push(val.dataIndex);
-
-        //let's see if we need to update widths
-        // console.debug(has_fullwidth_th);
     });
-
 
     //let's set column widths
     $('th.flexing').removeClass('flexing');
     $("#"+self.id+" th[dataindex='extra_th']").hide();
     if (!has_fullwidth_th) {
-
         if (flexid != null) {
             $("#"+self.id+" th[data-checkbox!=true][dataindex='"+flexid+"']").addClass('flexing');
         } else if (last_visible_index != null) {
@@ -190,7 +172,6 @@ RichHTML.grid.prototype.postToggleColumn = function(){
         } else {
             $("#"+self.id+" th[dataindex='extra_th']").show();
         }
-
     }
 
     //check if we have to move edit-icon to last visible th
@@ -212,13 +193,20 @@ RichHTML.grid.prototype.postToggleColumn = function(){
         // alert('we hid or readded last div');
     }
 
-    //cache time
-    self.set_cookie({
-        'action':'columns',
-        data:{
-            'h':a_hidden
-        }
-    });
+    //we just perfomed a column selection
+    //so let's cache it
+    if (cache) {
+        //cache time
+        self.set_cookie({
+            'action':'columns',
+            data:{
+                'h':a_hidden
+            }
+        });
+
+    }
+
+    self.reload();
 
 }
 
@@ -296,7 +284,6 @@ RichHTML.grid.prototype.initialLoad = function(json) {
 
     RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
-    self.setColumns();
 
     self.last_tag = 0;
     // self.timestamp("Start InitialLoad");
@@ -424,30 +411,6 @@ RichHTML.grid.prototype.groupOnGroupField = function (json) {
     return json;
 };
 
-RichHTML.grid.prototype.setColumns = function (config) {
-
-    var self = this;
-
-    if(jQuery.cookie != 'undefined') {
-        if ($.cookie("richgrid-data"+RichHTML.prefixLabel)) {
-            cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
-            if ( typeof(cookie_vars[this.el]) != "undefined" &&
-                 typeof(cookie_vars[this.el].hidden) != "undefined")
-             {
-                hidden = cookie_vars[this.el].hidden;
-                console.debug(hidden);
-                $.each(self.columns,function(i, val) {
-                    // self.columns[i].hidden = true;
-                });
-
-            }
-        }
-    }
-
-    // console.debug(self.internalTpl);
-
-};
-
 RichHTML.grid.prototype.reload = function (config) {
 	var self = this,params = {};
 
@@ -456,7 +419,7 @@ RichHTML.grid.prototype.reload = function (config) {
 
 	RichHTML.mask('#'+self.id);
     RichHTML.onPreLoad(self);
-    self.setColumns();
+    self.templatePrep();
 
 	//lets see if we are passing any new params
 	if (config && (typeof(config.params) !== "undefined")) {
@@ -525,6 +488,10 @@ RichHTML.grid.prototype.reload = function (config) {
             self.onLoad(true);
             // self.timestamp("End Reload");
         });
+
+        // self.postToggleColumn();
+
+
     } else {
         RichHTML.debug(1,Array('url config param is required to populate datagrid'));
         //lets render
@@ -648,23 +615,65 @@ RichHTML.grid.prototype.templatePrep = function()
 {
 
 	var self = this, cols = "", colCount = 0, expandercolCount = 0,
-    expanderDataIndex = "", expanderRenderer = "", itemIndex = "", richid = "", widthStr, last_visible_index = 0;
+    expanderDataIndex = "", expanderRenderer = "", itemIndex = "",
+    richid = "", widthStr, last_visible_index = null, hidden, foundhidden, has_fullwidth_th =false, flexid = null;
 
 	if (self.columns === null) {
 		RichHTML.debug(1,Array('You need to define columns array'));
 		return false;
 	}
 
+    hidden = null;
+    if(jQuery.cookie != 'undefined') {
+        if ($.cookie("richgrid-data"+RichHTML.prefixLabel)) {
+            cookie_vars = JSON.parse($.cookie("richgrid-data"+RichHTML.prefixLabel));
+
+            //hidden columns from cookies
+            if ( typeof(cookie_vars[self.el]) != "undefined" &&
+                 typeof(cookie_vars[self.el].hidden) != "undefined")
+             {
+                hidden = cookie_vars[self.el].hidden;
+            }
+
+            //dir //sort from cookie
+            if ( typeof(cookie_vars[self.el]) != "undefined" &&
+                 typeof(cookie_vars[self.el].d) != "undefined" &&
+                 typeof(cookie_vars[self.el].s) != "undefined")
+             {
+                self.baseParams.dir = cookie_vars[self.el].d;
+                self.baseParams.sort = cookie_vars[self.el].s;
+            }
+        }
+    }
+
 	$.each(self.columns,function(i, val) {
 
 		if (typeof(val.hidden)==="undefined") {val.hidden = false;}
 
+        if (hidden != null) {
+            foundhidden  = jQuery.inArray( self.columns[i].dataIndex, hidden );
+            if (foundhidden != -1 ) {
+                val.hidden = true;
+                self.columns[i].hidden = true;
+            } else {
+                val.hidden = false;
+                self.columns[i].hidden = false;
+            }
+        }
+
         if (val.xtype === "extra_th") {
 
+            extraid = i;
             self.columns[i].width = "100%";
+            self.columns[i].hidden = true;
+            // val.hidden = true;
             cols += "<td class='extra_td' valign='top'></td>";
 
 		} else if (val.xtype === "expander") {
+            //force visible
+            val.hidden = false;
+            self.columns[i].hidden = false;
+
 			if (val.dataIndex){
 				if (typeof(val.escapeHTML)==="undefined" || !val.escapeHTML) {
 					expanderDataIndex = "{"+val.dataIndex+"}";
@@ -677,22 +686,32 @@ RichHTML.grid.prototype.templatePrep = function()
 			cols += "<td valign='top' class='expander {{"+colCount+"-rich-delayedrenderer-classes}}' rowspan='1' id='{{#expanderid}}{{/expanderid}}'><div class='expander-icon'></div></td>";
 			self.columns[i].width = "23px";
 		} else if (val.xtype === "checkbox") {
-			itemIndex = (typeof(val.escapeHTML)==="undefined" || !val.escapeHTML) ? "{"+val.dataIndex+"}" : val.dataIndex;
+            //force visible
+            val.hidden = false;
+            self.columns[i].hidden = false;
+
+            itemIndex = (typeof(val.escapeHTML)==="undefined" || !val.escapeHTML) ? "{"+val.dataIndex+"}" : val.dataIndex;
 			self.hasCheckbox = true;
 			cols += "<td class='checkbox' id='{{#checkboxid}}{{"+itemIndex+"}}{{/checkboxid}}' {{#"+colCount+"-rich-renderer}}{{#getlastcellid}}{{/getlastcellid}}{-}{{"+itemIndex+"}}{||}{{"+itemIndex+"}}{{/"+colCount+"-rich-renderer}} valign='top'><div class='checkbox-icon'></div></td>";
 			self.columns[i].width = "28px";
             self.columns[i].hasCheckbox = true;
 		} else if (val.xtype === "drag") {
+            //force visible
+            val.hidden = false;
+            self.columns[i].hidden = false;
+
 			self.columns[i].width = "23px";
 			self.isDraggable = true;
 			cols += "<td class='draghandle' id='{{#cellid}}{{/cellid}}' valign='top'><div class='drag-icon'></div></td>";
 		} else if (val.dataIndex) {
+
             if (val.hidden) {
                 hiddenstyle = "display:none;"
             } else {
                 hiddenstyle = "";
-                last_visible_index = i;
             }
+
+            console.debug(val.dataIndex, val.hidden, hiddenstyle);
 
 			if(typeof(val.sortable) !== "undefined" && val.sortable) {
 				self.columns[i].sortable = "sortable";
@@ -715,16 +734,40 @@ RichHTML.grid.prototype.templatePrep = function()
 
 			itemIndex = (typeof(val.escapeHTML)==="undefined" || !val.escapeHTML) ? "{"+val.dataIndex+"}" : val.dataIndex;
 			cols += "<td id='{{#cellid}}{{/cellid}}' style='overflow: visible;"+hiddenstyle+"' class='"+( (typeof(val.align) !== "undefined") ? val.align : "left")+"' "+richid+"  dataindex='"+val.dataIndex+"' valign='top'>{{#"+colCount+"-rich-renderer}}{{#getlastcellid}}{{/getlastcellid}}{||}{{"+itemIndex+"}}{{/"+colCount+"-rich-renderer}}</td>";
+
 		}
 		colCount++;
         if (!val.hidden) expandercolCount++;
+
+        //need to see which fields is flexing
+        if (jQuery.inArray( val.xtype, ["expander","checkbox","drag","extra_th"] ) == -1) {
+            if (val.flex == 1 && !self.columns[i].hidden) flexid = i;
+            if ( (val.width == "100%") && (!self.columns[i].hidden)) has_fullwidth_th = true;
+            if (!self.columns[i].hidden) last_visible_index = i;
+        }
+
 	});
 
     if(typeof(self.editable) !== "undefined" && self.editable) {
+        if (last_visible_index == null) last_visible_index = extraid;
         self.columns[last_visible_index].editable = "editable";
         self.columns[last_visible_index].editable_menu = true;
         self.columns[last_visible_index].edit_icon_class = "edit-icon";
     }
+
+
+    if (!has_fullwidth_th) {
+        console.debug('need to cleean', flexid, last_visible_index);
+        if (flexid != null) {
+            self.columns[flexid].flexing = true;
+        } else if (last_visible_index != null) {
+            if (extraid == last_visible_index) {
+                self.columns[extraid].hidden = false;
+            }
+            self.columns[last_visible_index].flexing = true;
+        }
+    }
+
 
 	cols = "<tr {{#hidden}}style='display:none;'{{/hidden}} class='{{#getcollapsedstate}}{{/getcollapsedstate}}' id='{{#getrowid}}{{/getrowid}}'>"+cols+"</tr>";
 	if (self.hasExpander) {
@@ -877,16 +920,17 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 		if(typeof(reloading)==="undefined"){ reloading = false; }
 		if (!reloading) {
 			self.bindColumns();
-			//if default sort information is passed lets also
-			//mimic that the column was clicked
-			if (typeof(self.baseParams.sort) !== "undefined") {
-				RichHTML.debug(3,Array('Had default sort info - sorting column',self.baseParams));
-				event = jQuery.Event("click");
-				event.dosort = false;
-				event.sortdir = self.baseParams.dir.toLowerCase();
-				$("#"+self.id+" thead th.sortable[dataindex='"+self.baseParams.sort+"']").trigger(event);
-			}
 		}
+
+        //if default sort information is passed lets also
+        //mimic that the column was clicked
+        if (typeof(self.baseParams.sort) !== "undefined") {
+            RichHTML.debug(3,Array('Had default sort info - sorting column',self.baseParams));
+            event = jQuery.Event("click");
+            event.dosort = false;
+            event.sortdir = self.baseParams.dir.toLowerCase();
+            $("#"+self.id+" thead th.sortable[dataindex='"+self.baseParams.sort+"']").trigger(event);
+        }
 
 		if (self.hasExpander) {
 
