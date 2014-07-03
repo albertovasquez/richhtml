@@ -787,6 +787,7 @@ RichHTML.grid.prototype.bindColumns = function () {
 
 
     // $("#"+self.id+" thead th.sortable").bind('click', function(event) {
+    $("body").off('click',"#"+self.id+" thead th.sortable");
     $("body").on('click',"#"+self.id+" thead th.sortable", function(event) {
 
         if ( event.target.className === "col_checkbox" || event.target.className === "edit-icon" || event.target.className === "edit-column-entry") {
@@ -825,6 +826,7 @@ RichHTML.grid.prototype.bindColumns = function () {
 
     //click on clock to edit grid
     // $("th.editable div.edit-icon").bind('click', function(event) {
+    $("body").off('click',"th.editable div.edit-icon");
     $("body").on('click',"th.editable div.edit-icon", function(event) {
         event.preventDefault();
         $('.edit_menu').fadeToggle("fast", function() {
@@ -874,9 +876,9 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
 		RichHTML.debug(3,Array('Data Loaded - Setting up grid binds (expander & checkboxes)'));
 
 		if(typeof(reloading)==="undefined"){ reloading = false; }
-		if (!reloading) {
+		// if (!reloading) {
 			self.bindColumns();
-		}
+		// }
 
         //if default sort information is passed lets also
         //mimic that the column was clicked
