@@ -180,7 +180,7 @@ $.fn.hasAttr = function(prop, val) {
 };
 
 // replace this to hook up to your own lang lib
-if (!lang) {
+if (typeof lang !== 'function') {
     function _sprintf(s) {
         var re = /%/;
         var i = 0;
