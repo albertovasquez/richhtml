@@ -42,7 +42,7 @@ RichHTML.grid = function(config){
         scrollAmount: 5,
         savedY: 0
     };
-    this.emptyText= lang("No data found");
+    this.emptyText= "No data found";
     this.pagingData= [];
 
     //lets populate the config params if passed
@@ -1150,9 +1150,9 @@ RichHTML.grid.prototype.set_cookie = function(params) {
 RichHTML.grid.prototype.setMetaData = function() {
 	var self=this, meta = "";
     if (self.pagingData.totalItems == 0) {
-        meta = lang("Displaying items: % - % of %", 0, 0, 0);
+        meta = "Displaying items: 0 - 0 of 0";
     } else if (typeof(self.pagingData.start)!=="undefined") {
-        meta = lang("Displaying items: % - % of %", self.pagingData.start + 1, self.pagingData.start + self.pagingData.items, self.pagingData.totalItems);
+        meta = "Displaying items: " + (self.pagingData.start + 1)+" - "+(self.pagingData.start + self.pagingData.items)+" of "+self.pagingData.totalItems;
     }
     if (typeof(self.metaEl) !== "undefined") { $('#'+self.metaEl).html(meta); }
 	return meta;
