@@ -916,7 +916,6 @@ RichHTML.grid.prototype.setMetaData = function() {
     if (self.pagingData.totalItems == 0) {
         meta = lang("Displaying items: % - % of %", 0, 0, 0);
     } else if (typeof(self.pagingData.start)!=="undefined") {
-        console.log(lang);
         meta = lang("Displaying items: % - % of %", self.pagingData.start + 1, self.pagingData.start + self.pagingData.items, self.pagingData.totalItems);
     }
     if (typeof(self.metaEl) !== "undefined") { $('#'+self.metaEl).html(meta); }
