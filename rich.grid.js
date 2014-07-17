@@ -1144,7 +1144,6 @@ RichHTML.grid.prototype.set_cookie = function(params) {
         if (typeof (cookie_vars[self.el]['hidden']) == "undefined") cookie_vars[self.el].groups = {};
 
         cookie_vars[self.el].hidden = params.data['h'];
-        console.debug(cookie_vars);
     }
 
     $.cookie("richgrid-data"+RichHTML.prefixLabel, JSON.stringify(cookie_vars), {expires: self.cookieExpires});
