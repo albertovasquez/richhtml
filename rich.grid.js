@@ -46,6 +46,7 @@ RichHTML.grid = function(config){
     };
     this.emptyText= "No data found";
     this.pagingData= [];
+    this.cookieExpires = 365;
 
     //lets populate the config params if passed
     if (config.name) { this.name = config.name; }
@@ -80,6 +81,7 @@ RichHTML.grid = function(config){
     if (config.baseParams) {jQuery.extend(this.baseParams, config.baseParams);}
 
     if (config.totalProperty) {this.totalProperty = config.totalProperty;}
+    if (config.cookieExpires) {this.cookieExpires = config.cookieExpires;}
 
 };
 
@@ -1145,8 +1147,7 @@ RichHTML.grid.prototype.set_cookie = function(params) {
         console.debug(cookie_vars);
     }
 
-    $.cookie("richgrid-data"+RichHTML.prefixLabel, JSON.stringify(cookie_vars));
-
+    $.cookie("richgrid-data"+RichHTML.prefixLabel, JSON.stringify(cookie_vars), {expires: self.cookieExpires});
 }
 
 RichHTML.grid.prototype.setMetaData = function() {
