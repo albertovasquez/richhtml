@@ -82,7 +82,7 @@ RichHTML.msgBox = function (content, config, callback)
     if (typeof msgBox.options.afterClick === 'function' &&
         msgBox.options.afterClick !== false) {
         $(msgBox).bind({
-            "buttonclick" : function(event,data,msgBox) {
+            "buttonclick" : function(event,data) {
                 var elements, args = [];
                 elements = msgBox.form.serializeArray();
                 data.elements = {};
