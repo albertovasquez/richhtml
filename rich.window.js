@@ -35,6 +35,7 @@ RichHTML.msgBox = function (content, config, callback)
                 msgBox.options.buttons = msgBox.yesno_buttons;
                 break;
             case "prompt":
+                msgBox.options.type = "prompt";
                 msgBox.options.buttons = msgBox.prompt_buttons;
                 break;
             default:
@@ -198,6 +199,10 @@ RichHTML.window = function(config){
 
             if(!$(document.activeElement).is('div') && !$(document.activeElement).is('textarea')) {
                 e.preventDefault();
+                // enter key submits only windows of type prompt
+                if (self.options.type == 'prompt') {
+                    $('#' + self.id + ' #rich-button-button1').click();
+                }
                 return false;
             }
         }
