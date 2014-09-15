@@ -96,36 +96,38 @@ RichHTML.msgBox = function (content, config, callback)
         });
     }
 
+    return msgBox;
+
 };
 
 RichHTML.confirm = function(title,options,callback) {
     var config = {type: 'confirm'};
     config = $.extend(config,options);
-    RichHTML.msgBox(title,config,callback);
+    return RichHTML.msgBox(title,config,callback);
 };
 
 RichHTML.error = function(title,options,callback) {
     var config = {type: 'error'};
     config = $.extend(config,options);
-    RichHTML.msgBox(title,config,callback);
+    return RichHTML.msgBox(title,config,callback);
 };
 
 RichHTML.prompt = function(title,options,callback) {
     var config = {type: 'prompt'};
     config = $.extend(config,options);
-    RichHTML.msgBox(title,config,callback);
+    return RichHTML.msgBox(title,config,callback);
 };
 
 RichHTML.alert = function(msg,options,callback) {
     var config = {type: 'yesno'};
     config = $.extend(config,options);
-    RichHTML.msgBox(msg,config,callback);
+    return RichHTML.msgBox(msg,config,callback);
 };
 
 RichHTML.info = function(msg,options,callback) {
     var config = {type: 'info'};
     config = $.extend(config,options);
-    RichHTML.msgBox(msg,config,callback);
+    return RichHTML.msgBox(msg,config,callback);
 };
 
 RichHTML.window = function(config){
