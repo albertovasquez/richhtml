@@ -19,9 +19,9 @@ RichHTML.msgBox = function (content, config, callback)
     msgBox.options.allowblank = false;
     msgBox.options.value = "";
 
-    msgBox.confirm_buttons = {  button1:{text:lang("yes")}, button2:{text:lang("no")}, button3:{text:lang("cancel"),type:"cancel"} };
-    msgBox.prompt_buttons = {  button1:{text:lang("ok")}, button2:{text:lang("cancel"),type:"cancel"} };
-    msgBox.yesno_buttons = {  button1:{text:lang("yes")}, button2:{text:lang("no")} };
+    msgBox.confirm_buttons = {  button1:{text:lang("Yes")}, button2:{text:lang("No")}, button3:{text:lang("Cancel"),type:"cancel"} };
+    msgBox.prompt_buttons = {  button1:{text:lang("OK")}, button2:{text:lang("Cancel"),type:"cancel"} };
+    msgBox.yesno_buttons = {  button1:{text:lang("Yes")}, button2:{text:lang("No")} };
 
     msgBox.options = $.extend(msgBox.options,config);
 
