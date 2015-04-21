@@ -250,7 +250,10 @@ RichHTML.grid.prototype.initialLoad = function(json) {
         $.getJSON(self.url, self.baseParams, function(data) {
             //lets add some code here specifically for CE
             if (typeof(ce.parseResponse) === "function") {
-                data = ce.parseResponse(data);
+                cedata = ce.parseResponse(data);
+                if ( data.error == true ) {
+                    data.error = false;
+                }
             }
 
             // self.timestamp("Returned Json");
@@ -260,6 +263,7 @@ RichHTML.grid.prototype.initialLoad = function(json) {
                 RichHTML.debug(1,Array('Grid is expecting data collection in root named:'+self.root));
                 return false;
             }
+
             json.rows = data[self.root];
 
             json.rows = self.addRenderers(json.columns,json.rows);
@@ -393,10 +397,12 @@ RichHTML.grid.prototype.reload = function (config) {
 		RichHTML.debug(3,Array('JSON reload request for data',self.baseParams));
 		$.getJSON(self.url, self.baseParams, function(data) {
             // self.timestamp("Returned Json");
-
             //lets add some code here specifically for CE
             if (typeof(ce.parseResponse) === "function") {
-                data = ce.parseResponse(data);
+                cedata = ce.parseResponse(data);
+                if ( data.error == true ) {
+                    data.error = false;
+                }
             }
 
             RichHTML.debug(3,Array('JSON request success',data));
@@ -409,6 +415,7 @@ RichHTML.grid.prototype.reload = function (config) {
             json.rows = self.addRenderers(json.columns,json.rows);
             self.data = json.rows;
             self.jsonData = data;
+            console.log(json.rows);
             //lets render based on json returned
             //let's group the json if there is groupField passed
             if (self.groupField === null) {
