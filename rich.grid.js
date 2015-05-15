@@ -415,7 +415,6 @@ RichHTML.grid.prototype.reload = function (config) {
             json.rows = self.addRenderers(json.columns,json.rows);
             self.data = json.rows;
             self.jsonData = data;
-            console.log(json.rows);
             //lets render based on json returned
             //let's group the json if there is groupField passed
             if (self.groupField === null) {
