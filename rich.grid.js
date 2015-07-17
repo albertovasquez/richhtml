@@ -1160,7 +1160,6 @@ RichHTML.grid.prototype.setMetaData = function() {
     if (self.pagingData.totalItems == 0) {
         meta = lang("Displaying items")+": 0 - 0 "+lang("of")+" 0";
     } else if (typeof(self.pagingData.start)!=="undefined") {
-        meta = "Displaying items: " + (self.pagingData.start + 1)+" - "+(self.pagingData.start + self.pagingData.items)+" of "+self.pagingData.totalItems;
         meta = lang("Displaying items")+": " + (self.pagingData.start + 1)+" - "+(self.pagingData.start + self.pagingData.items)+" "+lang("of")+" "+self.pagingData.totalItems;
     }
     if (typeof(self.metaEl) !== "undefined") { $('#'+self.metaEl).html(meta); }
