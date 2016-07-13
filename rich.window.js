@@ -188,6 +188,9 @@ RichHTML.window = function(config){
             if(jQuery().timepicker) {
                 $('.richwindow .timepicker').timepicker('hideWidget');
             }
+            if(jQuery().colourPicker) {
+                $('#jquery-colour-picker').hide();
+            }
             self.hide();
         }
     };
@@ -527,6 +530,10 @@ RichHTML.window.prototype.hide = function () {
     // avoid timepicker issues remaining open issues. If there's no timepicker it doesn't matter, this won't do anything
     if(jQuery().timepicker) {
         $('.richwindow .timepicker').timepicker('hideWidget');
+    }
+
+    if(jQuery().colourPicker) {
+        $('#jquery-colour-picker').hide();
     }
 
     if (self.options.useOverlay) {
