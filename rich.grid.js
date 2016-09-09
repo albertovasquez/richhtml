@@ -44,7 +44,7 @@ RichHTML.grid = function(config){
         scrollAmount: 5,
         savedY: 0
     };
-    this.emptyText= "No data found";
+    this.emptyText= lang("No data found");
     this.pagingData= [];
     this.cookieExpires = 365;
 
