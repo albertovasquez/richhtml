@@ -879,6 +879,8 @@ RichHTML.grid.prototype.onLoad = function (reloading) {
         RichHTML.debug(3,Array('Data Not Loaded - Doesn\'t appear to be any data to load'));
         if (self.pagingEl !== null){ $("#"+self.pagingEl).html("");}
 		else { $("#"+self.id).parent().children(".richgrid-pagenavi-wrapper").html("");}
+        // We should always bind cols, even if no data...
+        self.bindColumns();
 	} else {
 		//we had data to render
 		RichHTML.debug(3,Array('Data Loaded - Setting up grid binds (expander & checkboxes)'));
